@@ -1,5 +1,7 @@
 # Binaries for all Go tools
 go-tools/**/adb-toolkit
+go-tools/**/nmap-toolkit
+go-tools/**/mobile-recon
 go-tools/**/*.exe
 go-tools/**/*.dll
 go-tools/**/*.so

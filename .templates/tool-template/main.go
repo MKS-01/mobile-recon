@@ -1,9 +1,9 @@
-// Package main is the entry point for the ADB Toolkit CLI application.
+// Package main is the entry point for the {{TOOL_NAME_TITLE}} CLI application.
 // It initializes and executes the Cobra command-line interface.
 package main
 
 import (
-	"github.com/MKS-01/mobile-recon/go-tools/adb-toolkit/cmd"
+	"github.com/MKS-01/mobile-recon/go-tools/{{TOOL_NAME}}/cmd"
 )
 
 // main is the application entry point that executes the root command.

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mks/adb-toolkit/pkg/adb"
-	"github.com/mks/adb-toolkit/pkg/utils"
+	"github.com/MKS-01/mobile-recon/go-tools/adb-toolkit/pkg/adb"
+	"github.com/MKS-01/mobile-recon/go-tools/adb-toolkit/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
