@@ -1,0 +1,89 @@
+# Binaries for all Go tools
+go-tools/**/adb-toolkit
+go-tools/**/*.exe
+go-tools/**/*.dll
+go-tools/**/*.so
+go-tools/**/*.dylib
+
+# General binaries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binaries
+*.test
+*.out
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Build artifacts
+dist/
+build/
+bin/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+*.bak
+
+# Temporary files from tools
+*.log
+*.tmp
+*.apk
+*.db
+*.sqlite
+*.png
+*.jpg
+*.jpeg
+*.mp4
+*.ab
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Node modules (if any Node.js scripts are added)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Python (if any Python scripts are added)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+
+# Logs
+logs/
+*.log
+
+# Coverage reports
+coverage/
+*.cover
+*.coverage
+.coverage.*
+htmlcov/
+
+# Local scripts not to be committed
+local/
+scratch/
+temp/
