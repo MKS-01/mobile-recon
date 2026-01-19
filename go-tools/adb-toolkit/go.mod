@@ -5,6 +5,7 @@ go 1.25.2
 require (
 	github.com/fatih/color v1.18.0
 	github.com/spf13/cobra v1.10.1
+	github.com/ulikunitz/xz v0.5.15
 )
 
 require (
