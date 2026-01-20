@@ -1,7 +1,7 @@
-# Binaries for all Go tools
-go-tools/**/adb-toolkit
-go-tools/**/nmap-toolkit
-go-tools/**/mobile-recon
+# Binaries for all Go tools (ignore only binary files in the root of each tool directory)
+go-tools/adb-toolkit/adb-toolkit
+go-tools/nmap-toolkit/nmap-toolkit
+go-tools/mobile-recon/mobile-recon
 go-tools/**/*.exe
 go-tools/**/*.dll
 go-tools/**/*.so

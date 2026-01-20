@@ -155,10 +155,144 @@ func GetDefaultDevice() (*Device, error) {
 //   - bool: true if ADB is found in PATH, false otherwise
 //
 // Example:
-//   if !IsADBInstalled() {
-//       fmt.Println("Please install Android SDK Platform Tools")
-//   }
+//
+//	if !IsADBInstalled() {
+//	    fmt.Println("Please install Android SDK Platform Tools")
+//	}
 func IsADBInstalled() bool {
 	_, err := exec.LookPath("adb")
 	return err == nil
+}
+
+// RestartAsRoot restarts the ADB daemon on the device with root permissions.
+// This is required for operations that need elevated privileges, such as
+// accessing protected directories or running Frida server.
+//
+// Parameters:
+//   - serial: Device serial number to target
+//
+// Returns:
+//   - bool: true if root access was granted, false if device doesn't support root
+//   - error: Error if the command fails
+//
+// Note: Root access is only available on:
+//   - Emulators with google_apis images (NOT google_apis_playstore)
+//   - Rooted physical devices
+//   - userdebug/eng builds
+func RestartAsRoot(serial string) (bool, error) {
+	output, err := ExecuteCommandWithDevice(serial, "root")
+	if err != nil {
+		return false, err
+	}
+
+	output = strings.TrimSpace(output)
+
+	// Check for success indicators
+	if strings.Contains(output, "restarting adbd as root") ||
+		strings.Contains(output, "already running as root") {
+		return true, nil
+	}
+
+	// Check for failure indicators
+	if strings.Contains(output, "cannot run as root") ||
+		strings.Contains(output, "production builds") {
+		return false, nil
+	}
+
+	// Unknown response - assume success if no error
+	return true, nil
+}
+
+// GetDeviceArchitecture returns the CPU architecture of the connected device.
+// This is useful for downloading architecture-specific binaries like Frida server.
+//
+// Parameters:
+//   - serial: Device serial number to target
+//
+// Returns:
+//   - string: Architecture string (arm64-v8a, armeabi-v7a, x86_64, x86)
+//   - error: Error if the command fails
+func GetDeviceArchitecture(serial string) (string, error) {
+	output, err := ExecuteCommandWithDevice(serial, "shell", "getprop", "ro.product.cpu.abi")
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(output), nil
+}
+
+// GetDeviceProperty retrieves a system property from the device.
+//
+// Parameters:
+//   - serial: Device serial number to target
+//   - property: Property name (e.g., "ro.build.version.sdk")
+//
+// Returns:
+//   - string: Property value
+//   - error: Error if the command fails
+func GetDeviceProperty(serial string, property string) (string, error) {
+	output, err := ExecuteCommandWithDevice(serial, "shell", "getprop", property)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(output), nil
+}
+
+// PushFile pushes a local file to the device.
+//
+// Parameters:
+//   - serial: Device serial number to target
+//   - localPath: Path to local file
+//   - remotePath: Destination path on device
+//
+// Returns:
+//   - error: Error if the push fails
+func PushFile(serial string, localPath string, remotePath string) error {
+	_, err := ExecuteCommandWithDevice(serial, "push", localPath, remotePath)
+	return err
+}
+
+// ShellCommand executes a shell command on the device and returns the output.
+//
+// Parameters:
+//   - serial: Device serial number to target
+//   - command: Shell command to execute
+//
+// Returns:
+//   - string: Command output
+//   - error: Error if the command fails
+func ShellCommand(serial string, command string) (string, error) {
+	return ExecuteCommandWithDevice(serial, "shell", command)
+}
+
+// GetProcessPID returns the PID of a process by name.
+//
+// Parameters:
+//   - serial: Device serial number to target
+//   - processName: Name of the process to find
+//
+// Returns:
+//   - string: PID if found, empty string if not running
+//   - error: Error if the command fails
+func GetProcessPID(serial string, processName string) (string, error) {
+	output, err := ExecuteCommandWithDevice(serial, "shell", "pidof", processName)
+	if err != nil {
+		// pidof returns error if process not found, which is not an error for us
+		return "", nil
+	}
+	return strings.TrimSpace(output), nil
+}
+
+// IsDeviceReady checks if the device has fully booted.
+//
+// Parameters:
+//   - serial: Device serial number to target
+//
+// Returns:
+//   - bool: true if device is ready, false otherwise
+func IsDeviceReady(serial string) bool {
+	output, err := GetDeviceProperty(serial, "sys.boot_completed")
+	if err != nil {
+		return false
+	}
+	return output == "1"
 }
