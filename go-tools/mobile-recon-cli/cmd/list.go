@@ -1,9 +1,9 @@
-// Package cmd implements list commands
 package cmd
 
 import (
 	"fmt"
 
+	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -27,19 +27,18 @@ func init() {
 }
 
 func listTools() {
-	headerColor := color.New(color.FgCyan, color.Bold)
 	successColor := color.New(color.FgGreen)
 	warningColor := color.New(color.FgYellow)
 	infoColor := color.New(color.FgHiBlack)
 
-	headerColor.Println("\n📦 Available Reconnaissance Tools")
+	output.Header("Available Reconnaissance Tools")
 	fmt.Println()
 
 	hasUnbuilt := false
 
 	for _, category := range toolMgr.Categories {
 		color.New(color.FgMagenta, color.Bold).Printf("▶ %s Tools\n", category.DisplayName)
-		fmt.Println(color.HiBlackString("  ────────────────────────────────────────"))
+		output.Divider()
 
 		for _, tool := range category.Tools {
 			if !showAll && !tool.Available {
@@ -62,13 +61,12 @@ func listTools() {
 	}
 
 	if hasUnbuilt && !showAll {
-		infoColor.Println("💡 Use --all or -a flag to show tools that are not yet built")
+		output.Info("Use --all or -a flag to show tools that are not yet built")
 		fmt.Println()
 	}
 
-	// Show quick start
 	fmt.Println()
-	headerColor.Println("🚀 Quick Start")
+	output.Header("Quick Start")
 	fmt.Println()
 	fmt.Printf("  Build a tool:     %s\n", color.HiWhiteString("mobile-recon build <tool-name>"))
 	fmt.Printf("  Build all tools:  %s\n", color.HiWhiteString("mobile-recon build --all"))

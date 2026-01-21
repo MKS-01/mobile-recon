@@ -22,7 +22,14 @@ The Mobile Recon CLI provides a centralized way to:
 
 ## Installation
 
-### Build from Source
+### Prerequisites
+
+- Go 1.21 or later
+- Git
+
+### Build from Source (Development)
+
+For local development and testing:
 
 ```bash
 cd go-tools/mobile-recon-cli
@@ -30,18 +37,33 @@ go mod download
 go build -o mobile-recon
 ```
 
+This builds the binary in the current directory. Run with `./mobile-recon`.
+
 ### Install Globally
+
+To install globally and use `mobile-recon` from anywhere, you **must** embed the source path using ldflags:
 
 ```bash
 cd go-tools/mobile-recon-cli
-go install
+
+# Replace <FULL_PATH_TO_GO_TOOLS> with your actual path
+go install -ldflags "-s -w -X github.com/MKS-01/mobile-recon/go-tools/mobile-recon-cli/pkg/toolmanager.SourcePath=<FULL_PATH_TO_GO_TOOLS>"
 ```
 
-Or use the Makefile from the root:
+Example:
 
 ```bash
-cd mobile-recon
-make install
+go install -ldflags "-s -w -X github.com/MKS-01/mobile-recon/go-tools/mobile-recon-cli/pkg/toolmanager.SourcePath=/Users/mks/Desktop/C0D3/mobile-recon/go-tools"
+```
+
+**Why is this needed?** The CLI needs to know where the tool source directories are located to build them. Without the embedded path, it will look for tools relative to the binary location (e.g., `/Users/mks/go/`) which is incorrect.
+
+### Quick Install Script
+
+You can also use this one-liner (run from the mobile-recon-cli directory):
+
+```bash
+go install -ldflags "-s -w -X github.com/MKS-01/mobile-recon/go-tools/mobile-recon-cli/pkg/toolmanager.SourcePath=$(cd .. && pwd)"
 ```
 
 ## Usage
@@ -210,17 +232,17 @@ go-tools/
 To add a new tool to the unified CLI:
 
 1. Create the tool in a new directory under `go-tools/`
-2. Update `toolmanager.go` to register the new tool:
 
-```go
-{
-    name:        "your-tool",
-    displayName: "Your Tool",
-    dir:         "your-tool",
-    binary:      "your-tool",
-    description: "Description of your tool",
-    category:    "Category", // Mobile, Network, Web, etc.
-},
+2. Add the tool to `pkg/toolmanager/tools.yaml`:
+
+```yaml
+tools:
+  - name: your-tool
+    display_name: Your Tool
+    dir: your-tool
+    binary: your-tool
+    description: Description of your tool
+    category: Category  # Mobile, Network, Web, etc.
 ```
 
 3. Rebuild the unified CLI:
@@ -228,6 +250,12 @@ To add a new tool to the unified CLI:
 ```bash
 cd go-tools/mobile-recon-cli
 go build -o mobile-recon
+```
+
+4. Build your new tool:
+
+```bash
+./mobile-recon build your-tool
 ```
 
 ## Architecture
@@ -292,9 +320,20 @@ Build the tool first:
 mobile-recon build [tool-name]
 ```
 
+### "chdir /Users/.../go/[tool-name]: no such file or directory"
+
+This error occurs when the CLI can't find the tool source directories. This happens when you installed globally without embedding the source path.
+
+**Solution:** Reinstall with the correct ldflags:
+
+```bash
+cd go-tools/mobile-recon-cli
+go install -ldflags "-s -w -X github.com/MKS-01/mobile-recon/go-tools/mobile-recon-cli/pkg/toolmanager.SourcePath=$(cd .. && pwd)"
+```
+
 ### "Failed to initialize tool manager"
 
-Ensure you're running from the correct directory or have proper permissions.
+Ensure you're running from the correct directory or have proper permissions. If installed globally, make sure the source path was embedded correctly during installation.
 
 ## Contributing
 

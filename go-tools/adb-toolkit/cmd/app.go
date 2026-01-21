@@ -1,16 +1,3 @@
-// Package cmd/app implements application/package management commands.
-// This file provides functionality for installing, uninstalling, listing,
-// and managing Android applications on connected devices.
-//
-// Commands:
-//   - app list:      List installed packages (with filters for system/third-party apps)
-//   - app install:   Install an APK file to the device
-//   - app uninstall: Remove an application from the device
-//   - app clear:     Clear app data and cache
-//   - app info:      Get detailed package information (version, path, permissions)
-//   - app start:     Launch an application
-//   - app stop:      Force stop a running application
-//   - app pull:      Extract APK from device to local machine
 package cmd
 
 import (
@@ -18,24 +5,21 @@ import (
 	"strings"
 
 	"github.com/MKS-01/mobile-recon/go-tools/adb-toolkit/pkg/adb"
-	"github.com/MKS-01/mobile-recon/go-tools/adb-toolkit/pkg/utils"
+	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/spf13/cobra"
 )
 
 var (
-	includeSystem  bool // Flag to filter for system apps only
-	thirdPartyOnly bool // Flag to filter for third-party apps only
+	includeSystem  bool
+	thirdPartyOnly bool
 )
 
-// appCmd is the parent command for all app/package management operations.
 var appCmd = &cobra.Command{
 	Use:   "app",
 	Short: "App/Package management commands",
 	Long:  "Install, uninstall, list, and manage Android applications",
 }
 
-// appListCmd lists installed packages on the device.
-// Supports filtering by package name and flags for system/third-party apps.
 var appListCmd = &cobra.Command{
 	Use:   "list [filter]",
 	Short: "List installed packages",
@@ -43,7 +27,7 @@ var appListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
@@ -59,14 +43,14 @@ var appListCmd = &cobra.Command{
 			shellArgs = append(shellArgs, args[0])
 		}
 
-		output, err := adb.ExecuteCommandWithDevice(serial, shellArgs...)
+		cmdOutput, err := adb.ExecuteCommandWithDevice(serial, shellArgs...)
 		if err != nil {
-			utils.PrintError("Failed to list packages: %v", err)
+			output.Error("Failed to list packages: %v", err)
 			return
 		}
 
-		packages := strings.Split(output, "\n")
-		utils.PrintSection("Installed Packages")
+		packages := strings.Split(cmdOutput, "\n")
+		output.Section("Installed Packages")
 
 		for _, pkg := range packages {
 			pkg = strings.TrimPrefix(pkg, "package:")
@@ -75,7 +59,7 @@ var appListCmd = &cobra.Command{
 			}
 		}
 
-		utils.PrintInfo("Total packages: %d", len(packages))
+		output.Info("Total packages: %d", len(packages))
 	},
 }
 
@@ -86,14 +70,14 @@ var appInstallCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
 		apkPath := args[0]
 		reinstall, _ := cmd.Flags().GetBool("reinstall")
 
-		utils.PrintInfo("Installing %s...", apkPath)
+		output.Info("Installing %s...", apkPath)
 
 		installArgs := []string{"install"}
 		if reinstall {
@@ -101,16 +85,16 @@ var appInstallCmd = &cobra.Command{
 		}
 		installArgs = append(installArgs, apkPath)
 
-		output, err := adb.ExecuteCommandWithDevice(serial, installArgs...)
+		cmdOutput, err := adb.ExecuteCommandWithDevice(serial, installArgs...)
 		if err != nil {
-			utils.PrintError("Installation failed: %v", err)
+			output.Error("Installation failed: %v", err)
 			return
 		}
 
-		if strings.Contains(output, "Success") {
-			utils.PrintSuccess("APK installed successfully")
+		if strings.Contains(cmdOutput, "Success") {
+			output.Success("APK installed successfully")
 		} else {
-			utils.PrintError("Installation failed: %s", output)
+			output.Error("Installation failed: %s", cmdOutput)
 		}
 	},
 }
@@ -122,14 +106,14 @@ var appUninstallCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
 		packageName := args[0]
 		keepData, _ := cmd.Flags().GetBool("keep-data")
 
-		utils.PrintInfo("Uninstalling %s...", packageName)
+		output.Info("Uninstalling %s...", packageName)
 
 		uninstallArgs := []string{"uninstall"}
 		if keepData {
@@ -137,16 +121,16 @@ var appUninstallCmd = &cobra.Command{
 		}
 		uninstallArgs = append(uninstallArgs, packageName)
 
-		output, err := adb.ExecuteCommandWithDevice(serial, uninstallArgs...)
+		cmdOutput, err := adb.ExecuteCommandWithDevice(serial, uninstallArgs...)
 		if err != nil {
-			utils.PrintError("Uninstall failed: %v", err)
+			output.Error("Uninstall failed: %v", err)
 			return
 		}
 
-		if strings.Contains(output, "Success") {
-			utils.PrintSuccess("App uninstalled successfully")
+		if strings.Contains(cmdOutput, "Success") {
+			output.Success("App uninstalled successfully")
 		} else {
-			utils.PrintError("Uninstall failed: %s", output)
+			output.Error("Uninstall failed: %s", cmdOutput)
 		}
 	},
 }
@@ -158,23 +142,23 @@ var appClearCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
 		packageName := args[0]
-		utils.PrintInfo("Clearing data for %s...", packageName)
+		output.Info("Clearing data for %s...", packageName)
 
-		output, err := adb.ExecuteCommandWithDevice(serial, "shell", "pm", "clear", packageName)
+		cmdOutput, err := adb.ExecuteCommandWithDevice(serial, "shell", "pm", "clear", packageName)
 		if err != nil {
-			utils.PrintError("Clear failed: %v", err)
+			output.Error("Clear failed: %v", err)
 			return
 		}
 
-		if strings.Contains(output, "Success") {
-			utils.PrintSuccess("App data cleared successfully")
+		if strings.Contains(cmdOutput, "Success") {
+			output.Success("App data cleared successfully")
 		} else {
-			utils.PrintError("Clear failed: %s", output)
+			output.Error("Clear failed: %s", cmdOutput)
 		}
 	},
 }
@@ -186,31 +170,27 @@ var appInfoCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
 		packageName := args[0]
-		utils.PrintSection(fmt.Sprintf("Package Info: %s", packageName))
+		output.Section(fmt.Sprintf("Package Info: %s", packageName))
 
-		// Get package path
 		path, _ := adb.ExecuteCommandWithDevice(serial, "shell", "pm", "path", packageName)
-		utils.Info.Printf("APK Path: %s\n", strings.TrimPrefix(path, "package:"))
+		output.InfoColor().Printf("APK Path: %s\n", strings.TrimPrefix(path, "package:"))
 
-		// Get package dump
 		dump, _ := adb.ExecuteCommandWithDevice(serial, "shell", "dumpsys", "package", packageName)
 
-		// Extract version info
 		lines := strings.Split(dump, "\n")
 		for _, line := range lines {
 			line = strings.TrimSpace(line)
 			if strings.HasPrefix(line, "versionCode=") || strings.HasPrefix(line, "versionName=") {
-				utils.Info.Println(line)
+				output.InfoColor().Println(line)
 			}
 		}
 
-		// Get permissions
-		utils.PrintInfo("\nPermissions:")
+		output.Info("\nPermissions:")
 		perms, _ := adb.ExecuteCommandWithDevice(serial, "shell", "dumpsys", "package", packageName)
 		permLines := strings.Split(perms, "\n")
 		inPermSection := false
@@ -237,22 +217,22 @@ var appStartCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
 		packageName := args[0]
-		utils.PrintInfo("Starting %s...", packageName)
+		output.Info("Starting %s...", packageName)
 
-		output, err := adb.ExecuteCommandWithDevice(serial, "shell", "monkey", "-p", packageName, "-c", "android.intent.category.LAUNCHER", "1")
+		cmdOutput, err := adb.ExecuteCommandWithDevice(serial, "shell", "monkey", "-p", packageName, "-c", "android.intent.category.LAUNCHER", "1")
 		if err != nil {
-			utils.PrintError("Failed to start app: %v", err)
+			output.Error("Failed to start app: %v", err)
 			return
 		}
 
-		utils.PrintSuccess("App started")
+		output.Success("App started")
 		if cmd.Flag("verbose").Changed {
-			fmt.Println(output)
+			fmt.Println(cmdOutput)
 		}
 	},
 }
@@ -264,20 +244,20 @@ var appStopCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
 		packageName := args[0]
-		utils.PrintInfo("Stopping %s...", packageName)
+		output.Info("Stopping %s...", packageName)
 
 		_, err = adb.ExecuteCommandWithDevice(serial, "shell", "am", "force-stop", packageName)
 		if err != nil {
-			utils.PrintError("Failed to stop app: %v", err)
+			output.Error("Failed to stop app: %v", err)
 			return
 		}
 
-		utils.PrintSuccess("App stopped")
+		output.Success("App stopped")
 	},
 }
 
@@ -288,16 +268,15 @@ var appPullCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
 		packageName := args[0]
 
-		// Get APK path
 		path, err := adb.ExecuteCommandWithDevice(serial, "shell", "pm", "path", packageName)
 		if err != nil {
-			utils.PrintError("Package not found: %v", err)
+			output.Error("Package not found: %v", err)
 			return
 		}
 
@@ -308,36 +287,30 @@ var appPullCmd = &cobra.Command{
 			outputPath = args[1]
 		}
 
-		utils.PrintInfo("Pulling APK from %s...", apkPath)
+		output.Info("Pulling APK from %s...", apkPath)
 		_, err = adb.ExecuteCommandWithDevice(serial, "pull", apkPath, outputPath)
 		if err != nil {
-			utils.PrintError("Pull failed: %v", err)
+			output.Error("Pull failed: %v", err)
 			return
 		}
 
-		utils.PrintSuccess("APK saved to %s", outputPath)
+		output.Success("APK saved to %s", outputPath)
 	},
 }
 
-// init registers all app management subcommands and their flags.
-// This function is automatically called when the package is imported.
 func init() {
 	rootCmd.AddCommand(appCmd)
 
-	// Register app list command with filtering flags
 	appCmd.AddCommand(appListCmd)
 	appListCmd.Flags().BoolVarP(&thirdPartyOnly, "third-party", "3", false, "Show only third-party apps")
 	appListCmd.Flags().BoolVarP(&includeSystem, "system", "s", false, "Show only system apps")
 
-	// Register app install command with reinstall option
 	appCmd.AddCommand(appInstallCmd)
 	appInstallCmd.Flags().BoolP("reinstall", "r", false, "Reinstall app keeping data")
 
-	// Register app uninstall command with data retention option
 	appCmd.AddCommand(appUninstallCmd)
 	appUninstallCmd.Flags().BoolP("keep-data", "k", false, "Keep app data after uninstall")
 
-	// Register other app commands
 	appCmd.AddCommand(appClearCmd)
 	appCmd.AddCommand(appInfoCmd)
 	appCmd.AddCommand(appStartCmd)

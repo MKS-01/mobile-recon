@@ -1,10 +1,9 @@
-// Package cmd implements build commands
 package cmd
 
 import (
 	"fmt"
 
-	"github.com/fatih/color"
+	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +26,7 @@ Examples:
 			}
 
 			if len(args) == 0 {
-				color.Red("Error: Please specify a tool name or use --all flag")
+				output.Error("Please specify a tool name or use --all flag")
 				fmt.Println()
 				cmd.Help()
 				return
@@ -62,71 +61,62 @@ func init() {
 }
 
 func buildTool(toolName string) {
-	successColor := color.New(color.FgGreen, color.Bold)
-	infoColor := color.New(color.FgCyan)
-
 	tool, err := toolMgr.GetTool(toolName)
 	if err != nil {
-		color.Red("Error: %v", err)
+		output.Error("%v", err)
 		fmt.Println()
-		color.Yellow("Available tools:")
+		output.Warning("Available tools:")
 		for _, t := range toolMgr.ListTools() {
 			fmt.Printf("  - %s\n", t.Name)
 		}
 		return
 	}
 
-	infoColor.Printf("\n🔨 Building %s...\n", tool.DisplayName)
+	output.Info("Building %s...", tool.DisplayName)
 	fmt.Println()
 
 	if err := toolMgr.BuildTool(tool.Name); err != nil {
-		color.Red("✗ Build failed: %v", err)
+		output.Error("Build failed: %v", err)
 		return
 	}
 
-	successColor.Printf("✓ Successfully built %s\n", tool.DisplayName)
+	output.Success("Successfully built %s", tool.DisplayName)
 	fmt.Println()
-	color.Cyan("Run with: mobile-recon run %s [args...]", tool.Name)
+	output.Info("Run with: mobile-recon run %s [args...]", tool.Name)
 	fmt.Println()
 }
 
 func buildAllTools() {
-	headerColor := color.New(color.FgCyan, color.Bold)
-	successColor := color.New(color.FgGreen, color.Bold)
-
-	headerColor.Println("\n🔨 Building All Tools...")
+	output.Header("Building All Tools...")
 	fmt.Println()
 
 	if err := toolMgr.BuildAllTools(); err != nil {
-		color.Red("✗ Build failed: %v", err)
+		output.Error("Build failed: %v", err)
 		return
 	}
 
 	fmt.Println()
-	successColor.Println("✓ All tools built successfully!")
+	output.Success("All tools built successfully!")
 	fmt.Println()
 }
 
 func installTool(toolName string) {
-	successColor := color.New(color.FgGreen, color.Bold)
-	infoColor := color.New(color.FgCyan)
-
 	tool, err := toolMgr.GetTool(toolName)
 	if err != nil {
-		color.Red("Error: %v", err)
+		output.Error("%v", err)
 		return
 	}
 
-	infoColor.Printf("\n📦 Installing %s globally...\n", tool.DisplayName)
+	output.Info("Installing %s globally...", tool.DisplayName)
 	fmt.Println()
 
 	if err := toolMgr.InstallTool(tool.Name); err != nil {
-		color.Red("✗ Installation failed: %v", err)
+		output.Error("Installation failed: %v", err)
 		return
 	}
 
-	successColor.Printf("✓ Successfully installed %s\n", tool.DisplayName)
+	output.Success("Successfully installed %s", tool.DisplayName)
 	fmt.Println()
-	color.Cyan("You can now run: %s [args...]", tool.Name)
+	output.Info("You can now run: %s [args...]", tool.Name)
 	fmt.Println()
 }
