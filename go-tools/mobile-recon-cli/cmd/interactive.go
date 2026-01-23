@@ -1,4 +1,3 @@
-// Package cmd implements interactive mode
 package cmd
 
 import (
@@ -6,22 +5,21 @@ import (
 	"os"
 	"strings"
 
+	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/MKS-01/mobile-recon/go-tools/mobile-recon-cli/pkg/toolmanager"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
 
-var (
-	interactiveCmd = &cobra.Command{
-		Use:   "interactive",
-		Short: "Interactive mode for tool selection",
-		Long:  `Launch an interactive menu to select and run tools.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			runInteractive()
-		},
-	}
-)
+var interactiveCmd = &cobra.Command{
+	Use:   "interactive",
+	Short: "Interactive mode for tool selection",
+	Long:  `Launch an interactive menu to select and run tools.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		runInteractive()
+	},
+}
 
 func init() {
 	rootCmd.AddCommand(interactiveCmd)
@@ -29,15 +27,14 @@ func init() {
 
 func runInteractive() {
 	for {
-		// Main menu
 		mainPrompt := promptui.Select{
 			Label: "Select Action",
 			Items: []string{
-				"📦 List Tools",
-				"🔨 Build Tool",
-				"🚀 Run Tool",
-				"📊 Browse by Category",
-				"❌ Exit",
+				"List Tools",
+				"Build Tool",
+				"Run Tool",
+				"Browse by Category",
+				"Exit",
 			},
 			Size: 10,
 		}
@@ -51,16 +48,16 @@ func runInteractive() {
 			continue
 		}
 
-		switch {
-		case strings.Contains(result, "List Tools"):
+		switch result {
+		case "List Tools":
 			listToolsInteractive()
-		case strings.Contains(result, "Build Tool"):
+		case "Build Tool":
 			buildToolInteractive()
-		case strings.Contains(result, "Run Tool"):
+		case "Run Tool":
 			runToolInteractive()
-		case strings.Contains(result, "Browse by Category"):
+		case "Browse by Category":
 			browseCategoryInteractive()
-		case strings.Contains(result, "Exit"):
+		case "Exit":
 			fmt.Println("\nGoodbye!")
 			os.Exit(0)
 		}
@@ -77,13 +74,13 @@ func listToolsInteractive() {
 func buildToolInteractive() {
 	tools := toolMgr.ListTools()
 	if len(tools) == 0 {
-		color.Yellow("\nNo tools available")
+		output.Warning("No tools available")
 		promptContinue()
 		return
 	}
 
 	items := make([]string, 0)
-	items = append(items, "🏗️  Build All Tools")
+	items = append(items, "Build All Tools")
 	items = append(items, "← Back")
 
 	for _, tool := range tools {
@@ -115,7 +112,6 @@ func buildToolInteractive() {
 		return
 	}
 
-	// Extract tool name
 	for _, tool := range tools {
 		if strings.Contains(result, tool.DisplayName) {
 			buildTool(tool.Name)
@@ -128,7 +124,7 @@ func buildToolInteractive() {
 func runToolInteractive() {
 	tools := toolMgr.ListAvailableTools()
 	if len(tools) == 0 {
-		color.Yellow("\nNo tools are built yet. Please build tools first.")
+		output.Warning("No tools are built yet. Please build tools first.")
 		promptContinue()
 		return
 	}
@@ -155,7 +151,6 @@ func runToolInteractive() {
 		return
 	}
 
-	// Extract tool name and run
 	for _, tool := range tools {
 		if strings.Contains(result, tool.DisplayName) {
 			fmt.Printf("\n%s %s\n", color.CyanString("Running:"), color.HiWhiteString(tool.DisplayName))
@@ -205,7 +200,6 @@ func browseCategoryInteractive() {
 		return
 	}
 
-	// Show tools in category
 	for _, category := range toolMgr.Categories {
 		if strings.Contains(result, category.DisplayName) {
 			showCategoryTools(category)
@@ -216,7 +210,7 @@ func browseCategoryInteractive() {
 
 func showCategoryTools(category toolmanager.ToolCategory) {
 	fmt.Println()
-	color.New(color.FgCyan, color.Bold).Printf("📂 %s Tools\n", category.DisplayName)
+	output.Header(fmt.Sprintf("%s Tools", category.DisplayName))
 	fmt.Println()
 
 	for _, tool := range category.Tools {

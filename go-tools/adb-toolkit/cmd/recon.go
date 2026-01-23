@@ -1,19 +1,3 @@
-// Package cmd/recon implements reconnaissance and reverse engineering commands.
-// This file provides tools for security research, penetration testing,
-// and reverse engineering of Android applications.
-//
-// Commands:
-//   - recon logcat:     Monitor and filter device logs in real-time
-//   - recon dump:       Extract comprehensive package information via dumpsys
-//   - recon activities: List all activities in an application
-//   - recon services:   List all services in an application
-//   - recon receivers:  List all broadcast receivers in an application
-//   - recon files:      List app's private files and directories (requires root)
-//   - recon db:         Pull and inspect app databases (requires root)
-//   - recon network:    Monitor active network connections
-//   - recon processes:  List running processes with optional filtering
-//
-// Security Note: Many commands require root access for full functionality.
 package cmd
 
 import (
@@ -22,11 +6,10 @@ import (
 	"strings"
 
 	"github.com/MKS-01/mobile-recon/go-tools/adb-toolkit/pkg/adb"
-	"github.com/MKS-01/mobile-recon/go-tools/adb-toolkit/pkg/utils"
+	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/spf13/cobra"
 )
 
-// reconCmd is the parent command for reconnaissance and reverse engineering operations.
 var reconCmd = &cobra.Command{
 	Use:   "recon",
 	Short: "Reconnaissance and reverse engineering utilities",
@@ -40,7 +23,7 @@ var reconLogcatCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
@@ -48,9 +31,9 @@ var reconLogcatCmd = &cobra.Command{
 		save, _ := cmd.Flags().GetString("save")
 
 		if clear {
-			utils.PrintInfo("Clearing logcat buffer...")
+			output.Info("Clearing logcat buffer...")
 			adb.ExecuteCommandWithDevice(serial, "logcat", "-c")
-			utils.PrintSuccess("Logcat cleared")
+			output.Success("Logcat cleared")
 			return
 		}
 
@@ -59,29 +42,29 @@ var reconLogcatCmd = &cobra.Command{
 			logcatArgs = append(logcatArgs, args[0])
 		}
 
-		utils.PrintInfo("Monitoring logcat (Ctrl+C to stop)...")
+		output.Info("Monitoring logcat (Ctrl+C to stop)...")
 
 		if save != "" {
 			logcatArgs = append(logcatArgs, "-d")
-			output, err := adb.ExecuteCommandWithDevice(serial, logcatArgs...)
+			cmdOutput, err := adb.ExecuteCommandWithDevice(serial, logcatArgs...)
 			if err != nil {
-				utils.PrintError("Logcat failed: %v", err)
+				output.Error("Logcat failed: %v", err)
 				return
 			}
 
-			err = os.WriteFile(save, []byte(output), 0644)
+			err = os.WriteFile(save, []byte(cmdOutput), 0644)
 			if err != nil {
-				utils.PrintError("Failed to save log: %v", err)
+				output.Error("Failed to save log: %v", err)
 				return
 			}
-			utils.PrintSuccess("Log saved to %s", save)
+			output.Success("Log saved to %s", save)
 		} else {
-			output, err := adb.ExecuteCommandWithDevice(serial, logcatArgs...)
+			cmdOutput, err := adb.ExecuteCommandWithDevice(serial, logcatArgs...)
 			if err != nil {
-				utils.PrintError("Logcat failed: %v", err)
+				output.Error("Logcat failed: %v", err)
 				return
 			}
-			fmt.Println(output)
+			fmt.Println(cmdOutput)
 		}
 	},
 }
@@ -93,17 +76,16 @@ var reconDumpCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
 		packageName := args[0]
-		utils.PrintSection(fmt.Sprintf("Package Dump: %s", packageName))
+		output.Section(fmt.Sprintf("Package Dump: %s", packageName))
 
-		// Dump package info
 		dump, err := adb.ExecuteCommandWithDevice(serial, "shell", "dumpsys", "package", packageName)
 		if err != nil {
-			utils.PrintError("Dump failed: %v", err)
+			output.Error("Dump failed: %v", err)
 			return
 		}
 
@@ -111,10 +93,10 @@ var reconDumpCmd = &cobra.Command{
 		if save != "" {
 			err = os.WriteFile(save, []byte(dump), 0644)
 			if err != nil {
-				utils.PrintError("Failed to save dump: %v", err)
+				output.Error("Failed to save dump: %v", err)
 				return
 			}
-			utils.PrintSuccess("Dump saved to %s", save)
+			output.Success("Dump saved to %s", save)
 		} else {
 			fmt.Println(dump)
 		}
@@ -128,16 +110,16 @@ var reconActivitiesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
 		packageName := args[0]
-		utils.PrintSection(fmt.Sprintf("Activities: %s", packageName))
+		output.Section(fmt.Sprintf("Activities: %s", packageName))
 
 		dump, err := adb.ExecuteCommandWithDevice(serial, "shell", "dumpsys", "package", packageName)
 		if err != nil {
-			utils.PrintError("Failed to get activities: %v", err)
+			output.Error("Failed to get activities: %v", err)
 			return
 		}
 
@@ -178,16 +160,16 @@ var reconServicesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
 		packageName := args[0]
-		utils.PrintSection(fmt.Sprintf("Services: %s", packageName))
+		output.Section(fmt.Sprintf("Services: %s", packageName))
 
 		dump, err := adb.ExecuteCommandWithDevice(serial, "shell", "dumpsys", "package", packageName)
 		if err != nil {
-			utils.PrintError("Failed to get services: %v", err)
+			output.Error("Failed to get services: %v", err)
 			return
 		}
 
@@ -228,16 +210,16 @@ var reconBroadcastCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
 		packageName := args[0]
-		utils.PrintSection(fmt.Sprintf("Broadcast Receivers: %s", packageName))
+		output.Section(fmt.Sprintf("Broadcast Receivers: %s", packageName))
 
 		dump, err := adb.ExecuteCommandWithDevice(serial, "shell", "dumpsys", "package", packageName)
 		if err != nil {
-			utils.PrintError("Failed to get receivers: %v", err)
+			output.Error("Failed to get receivers: %v", err)
 			return
 		}
 
@@ -278,33 +260,31 @@ var reconFilesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
 		packageName := args[0]
 		appDir := "/data/data/" + packageName
 
-		utils.PrintSection(fmt.Sprintf("App Files: %s", packageName))
+		output.Section(fmt.Sprintf("App Files: %s", packageName))
 
-		// Check if we have permission
 		testCmd := fmt.Sprintf("ls -la %s 2>&1", appDir)
-		output, err := adb.ExecuteCommandWithDevice(serial, "shell", testCmd)
-		if err != nil || strings.Contains(output, "Permission denied") {
-			utils.PrintWarning("Root access required. Attempting root...")
+		cmdOutput, err := adb.ExecuteCommandWithDevice(serial, "shell", testCmd)
+		if err != nil || strings.Contains(cmdOutput, "Permission denied") {
+			output.Warning("Root access required. Attempting root...")
 			_, err = adb.ExecuteCommandWithDevice(serial, "root")
 			if err != nil {
-				utils.PrintError("Failed to get root access. Cannot list app files.")
-				utils.PrintInfo("Try running: adb root")
+				output.Error("Failed to get root access. Cannot list app files.")
+				output.Info("Try running: adb root")
 				return
 			}
 		}
 
-		// List files
 		listCmd := fmt.Sprintf("ls -laR %s", appDir)
 		files, err := adb.ExecuteCommandWithDevice(serial, "shell", listCmd)
 		if err != nil {
-			utils.PrintError("Failed to list files: %v", err)
+			output.Error("Failed to list files: %v", err)
 			return
 		}
 
@@ -319,24 +299,22 @@ var reconDbCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
 		packageName := args[0]
 		dbDir := fmt.Sprintf("/data/data/%s/databases", packageName)
 
-		// List databases if no specific DB provided
 		if len(args) == 1 {
-			utils.PrintSection(fmt.Sprintf("Databases: %s", packageName))
+			output.Section(fmt.Sprintf("Databases: %s", packageName))
 
-			// May need root
 			adb.ExecuteCommandWithDevice(serial, "root")
 
 			dbs, err := adb.ExecuteCommandWithDevice(serial, "shell", "ls", dbDir)
 			if err != nil {
-				utils.PrintError("Failed to list databases: %v", err)
-				utils.PrintInfo("Make sure device is rooted")
+				output.Error("Failed to list databases: %v", err)
+				output.Info("Make sure device is rooted")
 				return
 			}
 
@@ -344,22 +322,21 @@ var reconDbCmd = &cobra.Command{
 			return
 		}
 
-		// Pull specific database
 		dbName := args[1]
 		remotePath := fmt.Sprintf("%s/%s", dbDir, dbName)
 		localPath := fmt.Sprintf("%s_%s", packageName, dbName)
 
-		utils.PrintInfo("Pulling database %s...", dbName)
+		output.Info("Pulling database %s...", dbName)
 
 		adb.ExecuteCommandWithDevice(serial, "root")
 		_, err = adb.ExecuteCommandWithDevice(serial, "pull", remotePath, localPath)
 		if err != nil {
-			utils.PrintError("Pull failed: %v", err)
+			output.Error("Pull failed: %v", err)
 			return
 		}
 
-		utils.PrintSuccess("Database saved to %s", localPath)
-		utils.PrintInfo("You can inspect it with: sqlite3 %s", localPath)
+		output.Success("Database saved to %s", localPath)
+		output.Info("You can inspect it with: sqlite3 %s", localPath)
 	},
 }
 
@@ -369,19 +346,19 @@ var reconNetworkCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
-		utils.PrintSection("Network Connections")
+		output.Section("Network Connections")
 
-		output, err := adb.ExecuteCommandWithDevice(serial, "shell", "netstat")
+		cmdOutput, err := adb.ExecuteCommandWithDevice(serial, "shell", "netstat")
 		if err != nil {
-			utils.PrintError("Failed to get network info: %v", err)
+			output.Error("Failed to get network info: %v", err)
 			return
 		}
 
-		fmt.Println(output)
+		fmt.Println(cmdOutput)
 	},
 }
 
@@ -392,56 +369,47 @@ var reconProcsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serial, err := getTargetDevice()
 		if err != nil {
-			utils.PrintError("%v", err)
+			output.Error("%v", err)
 			return
 		}
 
-		utils.PrintSection("Running Processes")
+		output.Section("Running Processes")
 
-		output, err := adb.ExecuteCommandWithDevice(serial, "shell", "ps")
+		cmdOutput, err := adb.ExecuteCommandWithDevice(serial, "shell", "ps")
 		if err != nil {
-			utils.PrintError("Failed to get processes: %v", err)
+			output.Error("Failed to get processes: %v", err)
 			return
 		}
 
 		if len(args) > 0 {
 			filter := args[0]
-			lines := strings.Split(output, "\n")
+			lines := strings.Split(cmdOutput, "\n")
 			for _, line := range lines {
 				if strings.Contains(line, filter) {
 					fmt.Println(line)
 				}
 			}
 		} else {
-			fmt.Println(output)
+			fmt.Println(cmdOutput)
 		}
 	},
 }
 
-// init registers all reconnaissance subcommands and their flags.
-// This function is automatically called when the package is imported.
 func init() {
 	rootCmd.AddCommand(reconCmd)
 
-	// Register logcat command with clear and save options
 	reconCmd.AddCommand(reconLogcatCmd)
 	reconLogcatCmd.Flags().BoolP("clear", "c", false, "Clear logcat buffer")
 	reconLogcatCmd.Flags().StringP("save", "s", "", "Save log to file")
 
-	// Register dump command with save option
 	reconCmd.AddCommand(reconDumpCmd)
 	reconDumpCmd.Flags().StringP("save", "s", "", "Save dump to file")
 
-	// Register app component analysis commands
-	reconCmd.AddCommand(reconActivitiesCmd)  // List activities
-	reconCmd.AddCommand(reconServicesCmd)    // List services
-	reconCmd.AddCommand(reconBroadcastCmd)   // List broadcast receivers
-
-	// Register file system and data extraction commands
-	reconCmd.AddCommand(reconFilesCmd)       // List app files (root required)
-	reconCmd.AddCommand(reconDbCmd)          // Pull databases (root required)
-
-	// Register system monitoring commands
-	reconCmd.AddCommand(reconNetworkCmd)     // Network connections
-	reconCmd.AddCommand(reconProcsCmd)       // Running processes
+	reconCmd.AddCommand(reconActivitiesCmd)
+	reconCmd.AddCommand(reconServicesCmd)
+	reconCmd.AddCommand(reconBroadcastCmd)
+	reconCmd.AddCommand(reconFilesCmd)
+	reconCmd.AddCommand(reconDbCmd)
+	reconCmd.AddCommand(reconNetworkCmd)
+	reconCmd.AddCommand(reconProcsCmd)
 }

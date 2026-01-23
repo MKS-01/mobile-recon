@@ -1,48 +1,81 @@
-// Package toolmanager handles tool discovery and execution
+// Package toolmanager handles tool discovery and execution.
 package toolmanager
 
 import (
+	"embed"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
+
+	"gopkg.in/yaml.v3"
 )
 
-// Tool represents a reconnaissance tool
+// Version is set via ldflags at build time
+var Version = "dev"
+
+// SourcePath is set via ldflags at build time to the go-tools directory
+var SourcePath = ""
+
+//go:embed tools.yaml
+var embeddedConfig embed.FS
+
 type Tool struct {
-	Name        string
-	DisplayName string
-	Path        string
-	Binary      string
-	Description string
-	Category    string
-	Available   bool
+	Name        string `yaml:"name"`
+	DisplayName string `yaml:"display_name"`
+	Path        string `yaml:"-"`
+	Binary      string `yaml:"binary"`
+	Description string `yaml:"description"`
+	Category    string `yaml:"category"`
+	Available   bool   `yaml:"-"`
 }
 
-// ToolCategory represents a category of tools
 type ToolCategory struct {
 	Name        string
 	DisplayName string
 	Tools       []Tool
 }
 
-// ToolManager manages available reconnaissance tools
 type ToolManager struct {
 	RootPath   string
 	Categories []ToolCategory
+	Verbose    bool
 }
 
-// NewToolManager creates a new tool manager
-func NewToolManager() (*ToolManager, error) {
-	// Get the root path (go-tools directory)
-	execPath, err := os.Executable()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get executable path: %v", err)
-	}
+// BuildOptions configures the build process
+type BuildOptions struct {
+	Verbose  bool
+	Version  string
+	Parallel bool
+}
 
-	// Navigate up to go-tools directory
-	rootPath := filepath.Dir(filepath.Dir(execPath))
+type toolConfig struct {
+	Tools []struct {
+		Name        string `yaml:"name"`
+		DisplayName string `yaml:"display_name"`
+		Dir         string `yaml:"dir"`
+		Binary      string `yaml:"binary"`
+		Description string `yaml:"description"`
+		Category    string `yaml:"category"`
+	} `yaml:"tools"`
+}
+
+func NewToolManager() (*ToolManager, error) {
+	var rootPath string
+
+	// Use embedded source path if set (from ldflags during build)
+	if SourcePath != "" {
+		rootPath = SourcePath
+	} else {
+		// Fall back to executable-relative path for development
+		execPath, err := os.Executable()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get executable path: %v", err)
+		}
+		rootPath = filepath.Dir(filepath.Dir(execPath))
+	}
 
 	tm := &ToolManager{
 		RootPath:   rootPath,
@@ -56,60 +89,64 @@ func NewToolManager() (*ToolManager, error) {
 	return tm, nil
 }
 
-// DiscoverTools discovers all available tools in the go-tools directory
-func (tm *ToolManager) DiscoverTools() error {
-	categories := make(map[string][]Tool)
+func New(baseDir string) *ToolManager {
+	tm := &ToolManager{
+		RootPath:   baseDir,
+		Categories: []ToolCategory{},
+	}
+	tm.DiscoverTools()
+	return tm
+}
 
-	// Define known tools
-	knownTools := []struct {
-		name        string
-		displayName string
-		dir         string
-		binary      string
-		description string
-		category    string
-	}{
-		{
-			name:        "adb-toolkit",
-			displayName: "ADB Toolkit",
-			dir:         "adb-toolkit",
-			binary:      "adb-toolkit",
-			description: "Android Debug Bridge automation toolkit",
-			category:    "Mobile",
-		},
-		{
-			name:        "nmap-toolkit",
-			displayName: "Nmap Toolkit",
-			dir:         "nmap-toolkit",
-			binary:      "nmap-toolkit",
-			description: "Network reconnaissance and scanning toolkit",
-			category:    "Network",
-		},
+func (tm *ToolManager) loadConfig() (*toolConfig, error) {
+	// Try embedded config first
+	data, err := embeddedConfig.ReadFile("tools.yaml")
+	if err != nil {
+		// Fall back to file in root path
+		configPath := filepath.Join(tm.RootPath, "tools.yaml")
+		data, err = os.ReadFile(configPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load tools config: %v", err)
+		}
 	}
 
-	for _, kt := range knownTools {
-		toolPath := filepath.Join(tm.RootPath, kt.dir)
-		binaryPath := filepath.Join(toolPath, kt.binary)
+	var config toolConfig
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return nil, fmt.Errorf("failed to parse tools config: %v", err)
+	}
+
+	return &config, nil
+}
+
+func (tm *ToolManager) DiscoverTools() error {
+	config, err := tm.loadConfig()
+	if err != nil {
+		return err
+	}
+
+	categories := make(map[string][]Tool)
+
+	for _, kt := range config.Tools {
+		toolPath := filepath.Join(tm.RootPath, kt.Dir)
+		binaryPath := filepath.Join(toolPath, kt.Binary)
 
 		tool := Tool{
-			Name:        kt.name,
-			DisplayName: kt.displayName,
+			Name:        kt.Name,
+			DisplayName: kt.DisplayName,
 			Path:        toolPath,
 			Binary:      binaryPath,
-			Description: kt.description,
-			Category:    kt.category,
+			Description: kt.Description,
+			Category:    kt.Category,
 			Available:   false,
 		}
 
-		// Check if binary exists
 		if _, err := os.Stat(binaryPath); err == nil {
 			tool.Available = true
 		}
 
-		categories[kt.category] = append(categories[kt.category], tool)
+		categories[kt.Category] = append(categories[kt.Category], tool)
 	}
 
-	// Convert map to slice of categories
 	for categoryName, tools := range categories {
 		tm.Categories = append(tm.Categories, ToolCategory{
 			Name:        strings.ToLower(categoryName),
@@ -121,29 +158,18 @@ func (tm *ToolManager) DiscoverTools() error {
 	return nil
 }
 
-// GetTool returns a tool by name
 func (tm *ToolManager) GetTool(name string) (*Tool, error) {
 	for _, category := range tm.Categories {
-		for _, tool := range category.Tools {
-			if tool.Name == name || strings.ToLower(tool.DisplayName) == strings.ToLower(name) {
-				return &tool, nil
+		for i := range category.Tools {
+			tool := &category.Tools[i]
+			if tool.Name == name || strings.EqualFold(tool.DisplayName, name) {
+				return tool, nil
 			}
 		}
 	}
 	return nil, fmt.Errorf("tool not found: %s", name)
 }
 
-// GetCategory returns a category by name
-func (tm *ToolManager) GetCategory(name string) (*ToolCategory, error) {
-	for _, category := range tm.Categories {
-		if category.Name == strings.ToLower(name) || strings.ToLower(category.DisplayName) == strings.ToLower(name) {
-			return &category, nil
-		}
-	}
-	return nil, fmt.Errorf("category not found: %s", name)
-}
-
-// ListTools returns all available tools
 func (tm *ToolManager) ListTools() []Tool {
 	var tools []Tool
 	for _, category := range tm.Categories {
@@ -152,7 +178,6 @@ func (tm *ToolManager) ListTools() []Tool {
 	return tools
 }
 
-// ListAvailableTools returns only built and available tools
 func (tm *ToolManager) ListAvailableTools() []Tool {
 	var tools []Tool
 	for _, category := range tm.Categories {
@@ -165,7 +190,6 @@ func (tm *ToolManager) ListAvailableTools() []Tool {
 	return tools
 }
 
-// RunTool executes a tool with the given arguments
 func (tm *ToolManager) RunTool(toolName string, args []string) error {
 	tool, err := tm.GetTool(toolName)
 	if err != nil {
@@ -184,17 +208,33 @@ func (tm *ToolManager) RunTool(toolName string, args []string) error {
 	return cmd.Run()
 }
 
-// BuildTool builds a specific tool
 func (tm *ToolManager) BuildTool(toolName string) error {
+	return tm.BuildToolWithOptions(toolName, BuildOptions{Verbose: tm.Verbose})
+}
+
+func (tm *ToolManager) BuildToolWithOptions(toolName string, opts BuildOptions) error {
 	tool, err := tm.GetTool(toolName)
 	if err != nil {
 		return err
 	}
 
-	cmd := exec.Command("go", "build", "-o", tool.Name)
+	version := opts.Version
+	if version == "" {
+		version = Version
+	}
+
+	ldflags := fmt.Sprintf("-s -w -X main.Version=%s", version)
+
+	args := []string{"build", "-trimpath", "-ldflags", ldflags, "-o", tool.Name}
+	cmd := exec.Command("go", args...)
 	cmd.Dir = tool.Path
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+
+	if opts.Verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	} else {
+		cmd.Stderr = os.Stderr
+	}
 
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to build %s: %v", tool.DisplayName, err)
@@ -204,20 +244,56 @@ func (tm *ToolManager) BuildTool(toolName string) error {
 	return nil
 }
 
-// BuildAllTools builds all tools
 func (tm *ToolManager) BuildAllTools() error {
-	for _, category := range tm.Categories {
-		for _, tool := range category.Tools {
-			fmt.Printf("Building %s...\n", tool.DisplayName)
-			if err := tm.BuildTool(tool.Name); err != nil {
-				return err
-			}
+	return tm.BuildAllToolsWithOptions(BuildOptions{Verbose: tm.Verbose})
+}
+
+func (tm *ToolManager) BuildAllToolsWithOptions(opts BuildOptions) error {
+	tools := tm.ListTools()
+
+	if opts.Parallel && len(tools) > 1 {
+		return tm.buildToolsParallel(tools, opts)
+	}
+
+	for _, tool := range tools {
+		fmt.Printf("Building %s...\n", tool.DisplayName)
+		if err := tm.BuildToolWithOptions(tool.Name, opts); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-// InstallTool installs a tool globally
+func (tm *ToolManager) buildToolsParallel(tools []Tool, opts BuildOptions) error {
+	var wg sync.WaitGroup
+	errChan := make(chan error, len(tools))
+
+	for _, tool := range tools {
+		wg.Add(1)
+		go func(t Tool) {
+			defer wg.Done()
+			fmt.Printf("Building %s...\n", t.DisplayName)
+			if err := tm.BuildToolWithOptions(t.Name, opts); err != nil {
+				errChan <- err
+			}
+		}(tool)
+	}
+
+	wg.Wait()
+	close(errChan)
+
+	var errs []string
+	for err := range errChan {
+		errs = append(errs, err.Error())
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("build errors:\n  %s", strings.Join(errs, "\n  "))
+	}
+
+	return nil
+}
+
 func (tm *ToolManager) InstallTool(toolName string) error {
 	tool, err := tm.GetTool(toolName)
 	if err != nil {

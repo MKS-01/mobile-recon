@@ -1,11 +1,10 @@
-module github.com/MKS-01/mobile-recon/go-tools/adb-toolkit
+module github.com/MKS-01/mobile-recon/go-tools/ios-toolkit
 
 go 1.21
 
 require (
 	github.com/MKS-01/mobile-recon/go-tools/common v0.0.0
 	github.com/spf13/cobra v1.10.1
-	github.com/ulikunitz/xz v0.5.15
 )
 
 require (

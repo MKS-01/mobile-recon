@@ -1,0 +1,14 @@
+tools:
+  - name: adb-toolkit
+    display_name: ADB Toolkit
+    dir: adb-toolkit
+    binary: adb-toolkit
+    description: Android Debug Bridge automation toolkit
+    category: Mobile
+
+  - name: nmap-toolkit
+    display_name: Nmap Toolkit
+    dir: nmap-toolkit
+    binary: nmap-toolkit
+    description: Network reconnaissance and scanning toolkit
+    category: Network

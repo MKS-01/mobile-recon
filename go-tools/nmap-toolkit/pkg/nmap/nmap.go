@@ -1,4 +1,4 @@
-// Package nmap provides a Go wrapper for Nmap network scanning functionality.
+// Package nmap provides Go wrapper for Nmap network scanning.
 package nmap
 
 import (
@@ -9,20 +9,17 @@ import (
 	"strings"
 )
 
-// ScanResult represents the result of an nmap scan
 type ScanResult struct {
 	Target  string
 	Output  string
 	Command string
 }
 
-// IsNmapInstalled checks if nmap is installed and available in PATH
 func IsNmapInstalled() bool {
 	_, err := exec.LookPath("nmap")
 	return err == nil
 }
 
-// GetVersion returns the installed nmap version
 func GetVersion() (string, error) {
 	cmd := exec.Command("nmap", "--version")
 	output, err := cmd.CombinedOutput()
@@ -37,7 +34,6 @@ func GetVersion() (string, error) {
 	return string(output), nil
 }
 
-// runNmapCommand executes an nmap command and returns the output
 func runNmapCommand(args []string, streamOutput bool) (*ScanResult, error) {
 	cmd := exec.Command("nmap", args...)
 
@@ -45,7 +41,6 @@ func runNmapCommand(args []string, streamOutput bool) (*ScanResult, error) {
 		Command: "nmap " + strings.Join(args, " "),
 	}
 
-	// Extract target from args
 	for _, arg := range args {
 		if !strings.HasPrefix(arg, "-") {
 			result.Target = arg
@@ -54,7 +49,6 @@ func runNmapCommand(args []string, streamOutput bool) (*ScanResult, error) {
 	}
 
 	if streamOutput {
-		// Stream output in real-time
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
 			return nil, fmt.Errorf("failed to create stdout pipe: %v", err)
@@ -90,7 +84,6 @@ func runNmapCommand(args []string, streamOutput bool) (*ScanResult, error) {
 
 		result.Output = outputBuf.String()
 	} else {
-		// Capture all output at once
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			return nil, fmt.Errorf("nmap scan failed: %v\nOutput: %s", err, string(output))
@@ -101,13 +94,11 @@ func runNmapCommand(args []string, streamOutput bool) (*ScanResult, error) {
 	return result, nil
 }
 
-// QuickScan performs a quick ping scan to discover live hosts
 func QuickScan(target string) (*ScanResult, error) {
 	args := []string{"-sn", target}
 	return runNmapCommand(args, false)
 }
 
-// PortScan performs a standard port scan on specified ports
 func PortScan(target string, ports string, options map[string]bool) (*ScanResult, error) {
 	args := []string{}
 
@@ -115,7 +106,6 @@ func PortScan(target string, ports string, options map[string]bool) (*ScanResult
 		args = append(args, "-p", ports)
 	}
 
-	// Add common options
 	if options["verbose"] {
 		args = append(args, "-v")
 	}
@@ -130,7 +120,6 @@ func PortScan(target string, ports string, options map[string]bool) (*ScanResult
 	return runNmapCommand(args, options["stream"])
 }
 
-// ServiceVersionScan performs service and version detection
 func ServiceVersionScan(target string, ports string, aggressive bool, stream bool) (*ScanResult, error) {
 	args := []string{"-sV"}
 
@@ -148,13 +137,11 @@ func ServiceVersionScan(target string, ports string, aggressive bool, stream boo
 	return runNmapCommand(args, stream)
 }
 
-// OSDetection performs operating system detection
 func OSDetection(target string, stream bool) (*ScanResult, error) {
 	args := []string{"-O", "-v", target}
 	return runNmapCommand(args, stream)
 }
 
-// AggressiveScan performs a comprehensive aggressive scan
 func AggressiveScan(target string, ports string, stream bool) (*ScanResult, error) {
 	args := []string{"-A", "-T4", "-v"}
 
@@ -166,13 +153,8 @@ func AggressiveScan(target string, ports string, stream bool) (*ScanResult, erro
 	return runNmapCommand(args, stream)
 }
 
-// VulnerabilityScan performs vulnerability scanning using NSE scripts
 func VulnerabilityScan(target string, ports string, stream bool) (*ScanResult, error) {
-	args := []string{
-		"--script", "vuln",
-		"-sV",
-		"-v",
-	}
+	args := []string{"--script", "vuln", "-sV", "-v"}
 
 	if ports != "" {
 		args = append(args, "-p", ports)
@@ -182,7 +164,6 @@ func VulnerabilityScan(target string, ports string, stream bool) (*ScanResult, e
 	return runNmapCommand(args, stream)
 }
 
-// SSLScan performs SSL/TLS enumeration and testing
 func SSLScan(target string, port string, stream bool) (*ScanResult, error) {
 	if port == "" {
 		port = "443"
@@ -198,9 +179,7 @@ func SSLScan(target string, port string, stream bool) (*ScanResult, error) {
 	return runNmapCommand(args, stream)
 }
 
-// MobileScan performs a scan optimized for mobile device detection
 func MobileScan(target string, stream bool) (*ScanResult, error) {
-	// Scan common mobile service ports
 	args := []string{
 		"-p", "21,22,23,80,443,5555,8080,8443,9000,27042,62078",
 		"-sV",
@@ -212,7 +191,6 @@ func MobileScan(target string, stream bool) (*ScanResult, error) {
 	return runNmapCommand(args, stream)
 }
 
-// AndroidADBScan scans for Android ADB devices on the network
 func AndroidADBScan(network string, stream bool) (*ScanResult, error) {
 	args := []string{
 		"-p", "5555,5556,5557,5558,5559",
@@ -224,23 +202,15 @@ func AndroidADBScan(network string, stream bool) (*ScanResult, error) {
 	return runNmapCommand(args, stream)
 }
 
-// CustomScan allows running custom nmap commands
 func CustomScan(nmapArgs []string, stream bool) (*ScanResult, error) {
 	return runNmapCommand(nmapArgs, stream)
 }
 
-// ScanNetwork performs a comprehensive network scan
 func ScanNetwork(network string, stream bool) (*ScanResult, error) {
-	args := []string{
-		"-sn",
-		"--min-rate", "1000",
-		network,
-	}
-
+	args := []string{"-sn", "--min-rate", "1000", network}
 	return runNmapCommand(args, stream)
 }
 
-// StealthScan performs a SYN stealth scan
 func StealthScan(target string, ports string, stream bool) (*ScanResult, error) {
 	args := []string{"-sS"}
 
@@ -254,7 +224,6 @@ func StealthScan(target string, ports string, stream bool) (*ScanResult, error) 
 	return runNmapCommand(args, stream)
 }
 
-// UDPScan performs a UDP scan
 func UDPScan(target string, ports string, stream bool) (*ScanResult, error) {
 	args := []string{"-sU"}
 
@@ -268,7 +237,6 @@ func UDPScan(target string, ports string, stream bool) (*ScanResult, error) {
 	return runNmapCommand(args, stream)
 }
 
-// ScriptScan runs specific NSE scripts
 func ScriptScan(target string, scripts string, ports string, stream bool) (*ScanResult, error) {
 	args := []string{"--script", scripts}
 
