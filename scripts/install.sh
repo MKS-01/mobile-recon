@@ -110,17 +110,55 @@ check_prerequisites() {
 # Build and Install Tools
 #############################################################################
 
+check_existing_installation() {
+    local tool_dir=$1
+    local install_path="$GOPATH/bin/$tool_dir"
+
+    if [ -f "$install_path" ]; then
+        return 0  # Tool exists
+    fi
+    return 1  # Tool does not exist
+}
+
+remove_existing_binary() {
+    local tool_dir=$1
+    local install_path="$GOPATH/bin/$tool_dir"
+
+    if [ -f "$install_path" ]; then
+        if [ "$VERBOSE" = true ]; then
+            print_info "Removing existing binary: $install_path"
+        fi
+        rm -f "$install_path"
+        if [ $? -eq 0 ]; then
+            return 0
+        else
+            print_error "Failed to remove existing binary: $install_path"
+            return 1
+        fi
+    fi
+    return 0
+}
+
 install_tool() {
     local tool_name=$1
     local tool_dir=$2
     local tool_path="$GO_TOOLS_DIR/$tool_dir"
+    local is_upgrade=false
 
     if [ ! -d "$tool_path" ]; then
         print_error "Tool directory not found: $tool_path"
         return 1
     fi
 
-    print_step "Building $tool_name..."
+    # Check if tool is already installed
+    if check_existing_installation "$tool_dir"; then
+        is_upgrade=true
+        local existing_path="$GOPATH/bin/$tool_dir"
+        print_info "$tool_name is already installed at: $existing_path"
+        print_step "Replacing with new build..."
+    else
+        print_step "Building $tool_name..."
+    fi
 
     cd "$tool_path"
 
@@ -145,8 +183,20 @@ install_tool() {
         return 1
     fi
 
+    # Remove existing binary before installing new one
+    if [ "$is_upgrade" = true ]; then
+        if ! remove_existing_binary "$tool_dir"; then
+            print_error "Failed to remove existing installation"
+            return 1
+        fi
+    fi
+
     # Install globally
-    print_step "Installing $tool_name globally..."
+    if [ "$is_upgrade" = true ]; then
+        print_step "Installing new build of $tool_name globally..."
+    else
+        print_step "Installing $tool_name globally..."
+    fi
 
     if [ "$VERBOSE" = true ]; then
         go install
@@ -155,7 +205,11 @@ install_tool() {
     fi
 
     if [ $? -eq 0 ]; then
-        print_success "Installed $tool_name to $GOPATH/bin/$tool_dir"
+        if [ "$is_upgrade" = true ]; then
+            print_success "Replaced $tool_name at $GOPATH/bin/$tool_dir"
+        else
+            print_success "Installed $tool_name to $GOPATH/bin/$tool_dir"
+        fi
     else
         print_error "Failed to install $tool_name"
         return 1
@@ -175,13 +229,36 @@ install_all_tools() {
     )
 
     local success_count=0
+    local upgrade_count=0
+    local fresh_count=0
     local fail_count=0
+
+    # First pass: count existing installations
+    for tool in "${tools[@]}"; do
+        IFS=':' read -r name dir <<< "$tool"
+        if check_existing_installation "$dir"; then
+            ((upgrade_count++))
+        fi
+    done
+
+    if [ $upgrade_count -gt 0 ]; then
+        print_info "Found $upgrade_count existing installation(s) - will be replaced with new build"
+        echo ""
+    fi
 
     for tool in "${tools[@]}"; do
         IFS=':' read -r name dir <<< "$tool"
 
+        local was_installed=false
+        if check_existing_installation "$dir"; then
+            was_installed=true
+        fi
+
         if install_tool "$name" "$dir"; then
             ((success_count++))
+            if [ "$was_installed" = false ]; then
+                ((fresh_count++))
+            fi
         else
             ((fail_count++))
         fi
@@ -192,6 +269,12 @@ install_all_tools() {
 
     if [ $success_count -gt 0 ]; then
         print_success "$success_count tool(s) installed successfully"
+        if [ $upgrade_count -gt 0 ]; then
+            print_info "  - $upgrade_count tool(s) replaced/upgraded"
+        fi
+        if [ $fresh_count -gt 0 ]; then
+            print_info "  - $fresh_count tool(s) freshly installed"
+        fi
     fi
 
     if [ $fail_count -gt 0 ]; then
