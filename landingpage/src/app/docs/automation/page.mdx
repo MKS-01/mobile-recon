@@ -1,0 +1,83 @@
+# Automation
+
+Automate security testing workflows with mobile-recon.
+
+## Scripting
+
+### Bash Scripts
+
+```bash
+#!/bin/bash
+# security-audit.sh
+
+TARGET_PACKAGE=$1
+
+# Extract APK
+adb-toolkit app pull-apk $TARGET_PACKAGE
+
+# Analyze
+apk-analyzer secrets ${TARGET_PACKAGE}.apk
+apk-analyzer security ${TARGET_PACKAGE}.apk
+apk-analyzer permissions ${TARGET_PACKAGE}.apk
+```
+
+### JSON Output
+
+Most commands support `--json` for machine-readable output:
+
+```bash
+adb-toolkit device list --json | jq '.devices[]'
+apk-analyzer info app.apk --json > report.json
+```
+
+## CI/CD Integration
+
+### GitHub Actions
+
+```yaml
+name: APK Security Scan
+
+on:
+  push:
+    paths:
+      - '**.apk'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install mobile-recon
+        run: |
+          go install github.com/MKS-01/mobile-recon/...@latest
+
+      - name: Security Scan
+        run: |
+          apk-analyzer audit app.apk --json > report.json
+          apk-analyzer audit app.apk --fail-on-secrets
+```
+
+## Batch Processing
+
+### Scan Multiple APKs
+
+```bash
+for apk in *.apk; do
+    echo "Scanning $apk..."
+    apk-analyzer secrets "$apk" >> results.txt
+done
+```
+
+### Network Discovery
+
+```bash
+# Discover and probe all Android devices
+nmap-toolkit mobile-scan android-adb 192.168.1.0/24 --json | \
+    jq -r '.devices[].ip' | \
+    xargs -I {} adb connect {}
+```
+
+## Next Steps
+
+- [Contributing](/docs/contributing) - Add your own tools

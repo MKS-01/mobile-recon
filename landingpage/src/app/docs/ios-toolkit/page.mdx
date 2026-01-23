@@ -1,0 +1,217 @@
+# iOS Toolkit
+
+iOS simulator automation with Frida integration for dynamic instrumentation.
+
+## Overview
+
+The iOS Toolkit provides tools for testing iOS applications in simulator environments. It leverages Frida for dynamic instrumentation without requiring a jailbroken device.
+
+## Simulator Management
+
+### List Simulators
+
+```bash
+ios-toolkit sim list
+```
+
+Shows all available simulators with their state (booted/shutdown).
+
+### Boot Simulator
+
+```bash
+ios-toolkit sim boot "iPhone 15 Pro"
+```
+
+### Shutdown Simulator
+
+```bash
+ios-toolkit sim shutdown "iPhone 15 Pro"
+```
+
+### Delete Simulator
+
+```bash
+ios-toolkit sim delete "iPhone 15 Pro"
+```
+
+## App Management
+
+### List Installed Apps
+
+```bash
+ios-toolkit app list
+```
+
+### Install App
+
+```bash
+ios-toolkit app install MyApp.app
+```
+
+### Uninstall App
+
+```bash
+ios-toolkit app uninstall com.example.myapp
+```
+
+### Launch App
+
+```bash
+ios-toolkit app launch com.example.myapp
+```
+
+### Terminate App
+
+```bash
+ios-toolkit app terminate com.example.myapp
+```
+
+## Frida Integration
+
+### Check Frida
+
+```bash
+ios-toolkit frida check
+```
+
+Verifies Frida is properly installed and accessible.
+
+### List Processes
+
+```bash
+ios-toolkit frida list-processes
+```
+
+### Attach to Process
+
+```bash
+ios-toolkit frida attach com.example.myapp
+```
+
+### Spawn with Frida
+
+```bash
+ios-toolkit frida spawn com.example.myapp
+```
+
+Spawns the app in suspended state for early instrumentation.
+
+### Method Tracing
+
+```bash
+ios-toolkit frida trace com.example.myapp -m "*[MyClass *]"
+```
+
+## File System Access
+
+### List App Files
+
+```bash
+ios-toolkit files list com.example.myapp
+```
+
+### Pull Files
+
+```bash
+ios-toolkit files pull com.example.myapp Documents/ ./output
+```
+
+### Push Files
+
+```bash
+ios-toolkit files push ./test.txt com.example.myapp Documents/
+```
+
+## Logging
+
+### Stream Logs
+
+```bash
+ios-toolkit log stream
+```
+
+### Filter by App
+
+```bash
+ios-toolkit log stream --predicate 'subsystem == "com.example.myapp"'
+```
+
+### Filter by Level
+
+```bash
+ios-toolkit log stream --level error
+```
+
+## Screenshots
+
+```bash
+ios-toolkit screenshot --output ./screen.png
+```
+
+## Keychain Access
+
+### Dump Keychain
+
+```bash
+ios-toolkit keychain dump
+```
+
+Note: Only works with simulator keychain, not actual device keychain.
+
+## Example Workflows
+
+### Basic App Testing
+
+```bash
+# 1. Boot simulator
+ios-toolkit sim boot "iPhone 15 Pro"
+
+# 2. Install app
+ios-toolkit app install MyApp.app
+
+# 3. Launch and monitor
+ios-toolkit app launch com.example.myapp
+ios-toolkit log stream --predicate 'subsystem == "com.example.myapp"'
+```
+
+### Dynamic Analysis with Frida
+
+```bash
+# 1. Spawn app suspended
+ios-toolkit frida spawn com.example.myapp
+
+# 2. Attach Frida script
+frida -U -n MyApp -l hook.js
+
+# 3. Resume execution
+```
+
+### Extract App Data
+
+```bash
+# List app's sandbox
+ios-toolkit files list com.example.myapp
+
+# Pull databases
+ios-toolkit files pull com.example.myapp Library/Application\ Support/ ./data
+
+# Pull preferences
+ios-toolkit files pull com.example.myapp Library/Preferences/ ./prefs
+```
+
+## Limitations
+
+- **Simulator Only** - Physical devices require additional setup
+- **No Keychain Protection** - Simulator keychain has weaker protection
+- **Some APIs Unavailable** - Push notifications, certain sensors
+
+## Requirements
+
+- Xcode installed
+- Frida (`pip install frida-tools`)
+- iOS Simulator runtime
+
+## Next Steps
+
+- [Frida Integration](/docs/frida-integration) - Advanced hooking
+- [ADB Toolkit](/docs/adb-toolkit) - Android equivalent

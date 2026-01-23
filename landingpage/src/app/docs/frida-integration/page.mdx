@@ -1,0 +1,152 @@
+# Frida Integration
+
+Dynamic instrumentation and runtime analysis using Frida.
+
+## Overview
+
+Frida is a dynamic instrumentation toolkit that allows you to inject JavaScript into running processes. mobile-recon integrates with Frida for both Android and iOS testing.
+
+## Prerequisites
+
+Install Frida tools:
+
+```bash
+pip install frida-tools
+```
+
+## Android Setup
+
+### Push Frida Server
+
+```bash
+# Download frida-server for your device architecture
+# Push to device
+adb push frida-server /data/local/tmp/
+adb shell chmod 755 /data/local/tmp/frida-server
+```
+
+### Start Server
+
+```bash
+adb shell /data/local/tmp/frida-server &
+```
+
+Or use the built-in helper:
+
+```bash
+adb-toolkit frida start
+```
+
+### Verify Connection
+
+```bash
+frida-ps -U
+```
+
+## iOS Setup (Simulator)
+
+For iOS simulators, Frida works without additional setup:
+
+```bash
+frida-ps -U
+```
+
+## Basic Usage
+
+### List Processes
+
+```bash
+frida-ps -U
+frida-ps -Ua  # Running apps only
+```
+
+### Attach to Process
+
+```bash
+frida -U -n "App Name"
+```
+
+### Spawn Application
+
+```bash
+frida -U -f com.example.app
+```
+
+## Scripting
+
+### Basic Hook
+
+```javascript
+// hook.js
+Java.perform(function() {
+    var MainActivity = Java.use('com.example.app.MainActivity');
+
+    MainActivity.sensitiveMethod.implementation = function() {
+        console.log('sensitiveMethod called!');
+        return this.sensitiveMethod();
+    };
+});
+```
+
+Run with:
+
+```bash
+frida -U -f com.example.app -l hook.js
+```
+
+### iOS Hook
+
+```javascript
+// ios-hook.js
+if (ObjC.available) {
+    var MyClass = ObjC.classes.MyClass;
+
+    Interceptor.attach(MyClass['- sensitiveMethod'].implementation, {
+        onEnter: function(args) {
+            console.log('sensitiveMethod called');
+        },
+        onLeave: function(retval) {
+            console.log('Return:', retval);
+        }
+    });
+}
+```
+
+## Common Tasks
+
+### SSL Pinning Bypass
+
+```javascript
+// Android
+Java.perform(function() {
+    var TrustManager = Java.use('javax.net.ssl.X509TrustManager');
+    // ... bypass implementation
+});
+```
+
+### Root Detection Bypass
+
+```javascript
+Java.perform(function() {
+    var RootCheck = Java.use('com.example.app.RootChecker');
+    RootCheck.isRooted.implementation = function() {
+        return false;
+    };
+});
+```
+
+### Method Tracing
+
+```bash
+frida-trace -U -f com.example.app -i "open*"
+```
+
+## Resources
+
+- [Frida Documentation](https://frida.re/docs/)
+- [Frida CodeShare](https://codeshare.frida.re/)
+
+## Next Steps
+
+- [ADB Toolkit](/docs/adb-toolkit) - Frida helpers for Android
+- [iOS Toolkit](/docs/ios-toolkit) - iOS Frida integration

@@ -1,0 +1,186 @@
+# ADB Toolkit
+
+Complete Android Debug Bridge toolkit for device management, application testing, and security analysis.
+
+## Overview
+
+The ADB Toolkit provides a comprehensive set of commands for interacting with Android devices, managing applications, and performing security testing operations.
+
+## Device Management
+
+### List Devices
+
+```bash
+adb-toolkit device list
+```
+
+### Device Information
+
+```bash
+adb-toolkit device info
+adb-toolkit device props
+```
+
+### Reboot Options
+
+```bash
+adb-toolkit device reboot           # Normal reboot
+adb-toolkit device reboot recovery  # Boot to recovery
+adb-toolkit device reboot bootloader
+```
+
+## Application Management
+
+### List Packages
+
+```bash
+# All packages
+adb-toolkit app list-packages
+
+# Third-party apps only
+adb-toolkit app list-packages --third-party
+
+# System apps only
+adb-toolkit app list-packages --system
+```
+
+### Install & Uninstall
+
+```bash
+adb-toolkit app install app.apk
+adb-toolkit app uninstall com.example.app
+```
+
+### Launch & Stop
+
+```bash
+adb-toolkit app launch com.example.app
+adb-toolkit app force-stop com.example.app
+adb-toolkit app clear-data com.example.app
+```
+
+### Extract APKs
+
+```bash
+adb-toolkit app pull-apk com.example.app
+```
+
+## Security Analysis
+
+### Package Dump
+
+```bash
+# Full package info
+adb-toolkit recon dump-package com.target.app
+
+# List activities
+adb-toolkit recon list-activities com.target.app
+
+# List services
+adb-toolkit recon list-services com.target.app
+
+# List receivers
+adb-toolkit recon list-receivers com.target.app
+```
+
+### Data Extraction (Root Required)
+
+```bash
+# Extract app databases
+adb-toolkit recon extract-db com.target.app
+
+# Extract shared preferences
+adb-toolkit recon extract-prefs com.target.app
+
+# Extract all app files
+adb-toolkit recon extract-files com.target.app
+```
+
+## Monitoring
+
+### Logcat
+
+```bash
+# All logs
+adb-toolkit log logcat
+
+# Filter by package
+adb-toolkit log logcat --package com.target.app
+
+# Filter by tag
+adb-toolkit log logcat --tag MyTag
+```
+
+### Process & Network
+
+```bash
+adb-toolkit recon list-processes
+adb-toolkit recon net-connections
+```
+
+## Input Simulation
+
+### Text & Tap
+
+```bash
+adb-toolkit input text "Hello World"
+adb-toolkit input tap 500 800
+adb-toolkit input swipe 100 500 400 500
+```
+
+### Key Events
+
+```bash
+adb-toolkit input keyevent BACK
+adb-toolkit input keyevent HOME
+adb-toolkit input keyevent ENTER
+```
+
+## Screenshots & Recording
+
+```bash
+adb-toolkit device screenshot
+adb-toolkit device screenrecord --duration 30
+```
+
+## Frida Integration
+
+```bash
+# Check Frida server status
+adb-toolkit frida check
+
+# Start Frida server
+adb-toolkit frida start
+
+# List running processes
+adb-toolkit frida list-processes
+
+# Generate trace command
+adb-toolkit frida trace com.target.app
+```
+
+## Examples
+
+### Complete Reconnaissance Workflow
+
+```bash
+# 1. Connect to device
+adb-toolkit device list
+
+# 2. Find target app
+adb-toolkit app list-packages --third-party | grep target
+
+# 3. Extract APK for analysis
+adb-toolkit app pull-apk com.target.app
+
+# 4. Dump package info
+adb-toolkit recon dump-package com.target.app
+
+# 5. Monitor runtime behavior
+adb-toolkit log logcat --package com.target.app
+```
+
+## Next Steps
+
+- [APK Analyzer](/docs/apk-analyzer) - Static analysis of extracted APKs
+- [Frida Integration](/docs/frida-integration) - Dynamic instrumentation

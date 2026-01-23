@@ -1,0 +1,187 @@
+# APK Analyzer
+
+Static analysis toolkit for Android applications with comprehensive security scanning.
+
+## Overview
+
+APK Analyzer performs deep inspection of Android APK files without needing a device or emulator. It extracts metadata, analyzes permissions, and detects potential security issues.
+
+## Basic Commands
+
+### APK Information
+
+```bash
+apk-analyzer info app.apk
+```
+
+Output includes:
+- Package name
+- Version code and name
+- Min/Target SDK
+- File size and hashes
+
+### Permission Analysis
+
+```bash
+apk-analyzer permissions app.apk
+```
+
+Categorizes permissions by risk level:
+- **Dangerous** - Runtime permissions (camera, contacts, location)
+- **Signature** - System-level permissions
+- **Normal** - Low-risk permissions
+
+## Security Analysis
+
+### Hardcoded Secrets Detection
+
+```bash
+apk-analyzer secrets app.apk
+```
+
+Scans for:
+- AWS credentials (Access keys, Secret keys)
+- API keys and tokens
+- Private keys (RSA, EC)
+- Firebase configurations
+- Generic secrets patterns
+
+### Security Misconfigurations
+
+```bash
+apk-analyzer security app.apk
+```
+
+Checks for:
+- Debuggable flag enabled
+- Backup allowed
+- Clear text traffic allowed
+- Exported components without permissions
+- Weak crypto implementations
+
+## Manifest Analysis
+
+### Parse AndroidManifest.xml
+
+```bash
+apk-analyzer manifest app.apk
+```
+
+### List Components
+
+```bash
+# Activities
+apk-analyzer activities app.apk
+
+# Services
+apk-analyzer services app.apk
+
+# Receivers
+apk-analyzer receivers app.apk
+
+# Providers
+apk-analyzer providers app.apk
+```
+
+## String Extraction
+
+### Extract All Strings
+
+```bash
+apk-analyzer strings app.apk
+```
+
+### Filter Strings
+
+```bash
+# URLs only
+apk-analyzer strings app.apk --filter url
+
+# IPs
+apk-analyzer strings app.apk --filter ip
+
+# Emails
+apk-analyzer strings app.apk --filter email
+```
+
+## File Inspection
+
+### List APK Contents
+
+```bash
+apk-analyzer files app.apk
+```
+
+### Extract Specific Files
+
+```bash
+apk-analyzer extract app.apk --file classes.dex --output ./output
+```
+
+## Native Libraries
+
+### List Native Libs
+
+```bash
+apk-analyzer native app.apk
+```
+
+### Analyze Native Strings
+
+```bash
+apk-analyzer native-strings app.apk
+```
+
+## Full Security Audit
+
+### Comprehensive Scan
+
+```bash
+apk-analyzer audit app.apk --output report.json
+```
+
+This runs all checks and generates a detailed report including:
+- Basic info
+- All permissions with risk assessment
+- Security misconfigurations
+- Detected secrets
+- Exported components
+- Network security config analysis
+
+## Examples
+
+### Quick Security Check
+
+```bash
+# Pull APK from device
+adb-toolkit app pull-apk com.target.app
+
+# Run security scan
+apk-analyzer secrets com.target.app.apk
+apk-analyzer security com.target.app.apk
+```
+
+### CI/CD Integration
+
+```bash
+# Exit with error code if issues found
+apk-analyzer audit app.apk --fail-on-secrets --fail-on-debug
+```
+
+## Output Formats
+
+```bash
+# JSON output
+apk-analyzer info app.apk --json
+
+# Pretty print
+apk-analyzer info app.apk --pretty
+
+# Quiet mode (errors only)
+apk-analyzer info app.apk --quiet
+```
+
+## Next Steps
+
+- [ADB Toolkit](/docs/adb-toolkit) - Extract APKs from devices
+- [Frida Integration](/docs/frida-integration) - Dynamic analysis

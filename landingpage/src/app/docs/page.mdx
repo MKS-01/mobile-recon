@@ -1,0 +1,59 @@
+# Introduction
+
+Welcome to the **mobile-recon** documentation. This toolkit provides comprehensive tools for mobile security testing, network reconnaissance, and penetration testing on Android and iOS platforms.
+
+## What is mobile-recon?
+
+mobile-recon is a modular, extensible security toolkit designed for:
+
+- **Security Researchers** conducting mobile application security assessments
+- **Penetration Testers** performing authorized security testing
+- **Mobile Developers** debugging and testing their applications
+- **Security Educators** teaching mobile security concepts
+
+## Core Toolkits
+
+### ADB Toolkit
+Complete Android Debug Bridge integration for device management, app extraction, and security testing.
+
+### APK Analyzer
+Static analysis toolkit for Android applications with comprehensive security scanning, including hardcoded secrets detection and permission analysis.
+
+### iOS Toolkit
+iOS simulator automation with Frida integration for dynamic instrumentation—no jailbreak required for simulators.
+
+### Nmap Toolkit
+Advanced network reconnaissance with mobile-specific scanning capabilities, including Android ADB device discovery.
+
+## Key Features
+
+- **Unified CLI** - Single command interface for all tools
+- **Modular Design** - Use individual tools or the full suite
+- **Extensible** - Easy to add custom tools and scripts
+- **Cross-Platform** - Works on macOS, Linux, and Windows
+
+## Quick Example
+
+```bash
+# List all available tools
+mobile-recon list
+
+# Start interactive mode
+mobile-recon interactive
+
+# Run ADB toolkit command
+mobile-recon adb device list
+
+# Analyze an APK
+apk-analyzer secrets target.apk
+```
+
+## Legal Notice
+
+This toolkit is intended for **authorized security testing only**. Always obtain proper authorization before testing any systems or applications. Unauthorized access to computer systems is illegal.
+
+## Next Steps
+
+- [Installation Guide](/docs/installation) - Get mobile-recon set up on your system
+- [Quick Start](/docs/quick-start) - Start using the toolkit in minutes
+- [ADB Toolkit](/docs/adb-toolkit) - Deep dive into Android testing
