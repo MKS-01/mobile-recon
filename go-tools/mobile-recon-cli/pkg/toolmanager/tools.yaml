@@ -12,3 +12,10 @@ tools:
     binary: nmap-toolkit
     description: Network reconnaissance and scanning toolkit
     category: Network
+
+  - name: apk-analyzer
+    display_name: APK Analyzer
+    dir: apk-analyzer
+    binary: apk-analyzer
+    description: Android APK static analysis toolkit
+    category: Mobile
