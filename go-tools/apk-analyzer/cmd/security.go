@@ -34,7 +34,7 @@ Examples:
 }
 
 func init() {
-	rootCmd.AddCommand(securityCmd)
+	RootCmd.AddCommand(securityCmd)
 }
 
 func runSecurity(cmd *cobra.Command, args []string) {

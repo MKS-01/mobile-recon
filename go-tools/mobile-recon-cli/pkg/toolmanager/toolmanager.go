@@ -140,8 +140,13 @@ func (tm *ToolManager) DiscoverTools() error {
 			Available:   false,
 		}
 
+		// Check if binary exists in the local project directory
 		if _, err := os.Stat(binaryPath); err == nil {
 			tool.Available = true
+		} else if path, err := exec.LookPath(kt.Binary); err == nil {
+			// Check if binary is available in system PATH
+			tool.Available = true
+			tool.Binary = path
 		}
 
 		categories[kt.Category] = append(categories[kt.Category], tool)

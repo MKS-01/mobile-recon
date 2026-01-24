@@ -43,7 +43,7 @@ Examples:
 }
 
 func init() {
-	rootCmd.AddCommand(stringsCmd)
+	RootCmd.AddCommand(stringsCmd)
 	stringsCmd.Flags().IntVarP(&minStringLength, "min", "m", 6, "Minimum string length")
 	stringsCmd.Flags().StringVarP(&searchPattern, "search", "s", "", "Regex pattern to search for")
 	stringsCmd.Flags().StringVarP(&targetFile, "file", "f", "", "Specific file to extract from")

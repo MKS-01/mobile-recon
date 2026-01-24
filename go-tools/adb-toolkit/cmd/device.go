@@ -214,7 +214,7 @@ var deviceScreenRecordCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(deviceCmd)
+	RootCmd.AddCommand(deviceCmd)
 	deviceCmd.AddCommand(deviceListCmd)
 	deviceCmd.AddCommand(deviceInfoCmd)
 	deviceCmd.AddCommand(deviceRebootCmd)

@@ -33,7 +33,7 @@ Examples:
 }
 
 func init() {
-	rootCmd.AddCommand(infoCmd)
+	RootCmd.AddCommand(infoCmd)
 }
 
 func runInfo(cmd *cobra.Command, args []string) {

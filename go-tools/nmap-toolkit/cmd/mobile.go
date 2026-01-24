@@ -166,7 +166,7 @@ var appPortsCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(mobileCmd)
+	RootCmd.AddCommand(mobileCmd)
 
 	mobileCmd.AddCommand(androidADBCmd)
 	mobileCmd.AddCommand(mobileScanCmd)

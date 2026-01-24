@@ -12,9 +12,10 @@ import (
 var (
 	deviceSerial string
 
-	rootCmd = &cobra.Command{
-		Use:   "adb-toolkit",
-		Short: "Advanced ADB toolkit for Android development and reverse engineering",
+	// RootCmd is the root command for ADB toolkit (exported for embedding)
+	RootCmd = &cobra.Command{
+		Use:   "adb",
+		Short: "Android Debug Bridge toolkit",
 		Long: `A comprehensive toolkit for Android Debug Bridge (ADB) operations.
 Perfect for day-to-day development tasks, debugging, and reverse engineering.`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
@@ -27,14 +28,14 @@ Perfect for day-to-day development tasks, debugging, and reverse engineering.`,
 )
 
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		output.Error("%v", err)
 		os.Exit(1)
 	}
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&deviceSerial, "device", "d", "", "Target device serial number")
+	RootCmd.PersistentFlags().StringVarP(&deviceSerial, "device", "d", "", "Target device serial number")
 }
 
 func getTargetDevice() (string, error) {

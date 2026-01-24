@@ -17,9 +17,9 @@ var (
 	// verbose enables verbose output
 	verbose bool
 
-	// rootCmd is the base command for the CLI application.
-	rootCmd = &cobra.Command{
-		Use:   "apk-analyzer",
+	// RootCmd is the root command for APK analyzer (exported for embedding)
+	RootCmd = &cobra.Command{
+		Use:   "apk",
 		Short: "Android APK static analysis toolkit",
 		Long: `A comprehensive toolkit for static analysis of Android APK files.
 
@@ -38,7 +38,7 @@ Perfect for mobile security testing, app reverse engineering, and malware analys
 
 // Execute runs the root command and handles any errors.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		utils.PrintError("%v", err)
 		os.Exit(1)
 	}
@@ -46,8 +46,8 @@ func Execute() {
 
 // init sets up persistent flags that are available to all subcommands.
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "text", "Output format (text, json)")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
+	RootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "text", "Output format (text, json)")
+	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 }
 
 // validateAPKPath checks if the provided path is a valid APK file.

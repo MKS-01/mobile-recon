@@ -36,7 +36,7 @@ Examples:
 }
 
 func init() {
-	rootCmd.AddCommand(filesCmd)
+	RootCmd.AddCommand(filesCmd)
 	filesCmd.Flags().StringVar(&filterPattern, "filter", "", "Filter files by pattern (glob)")
 	filesCmd.Flags().StringVar(&extractPath, "extract", "", "Extract specific file from APK")
 	filesCmd.Flags().BoolVar(&listTree, "tree", false, "Display as directory tree")

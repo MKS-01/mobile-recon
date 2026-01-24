@@ -159,7 +159,7 @@ var inputBackCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(inputCmd)
+	RootCmd.AddCommand(inputCmd)
 	inputCmd.AddCommand(inputTextCmd)
 	inputCmd.AddCommand(inputTapCmd)
 	inputCmd.AddCommand(inputSwipeCmd)

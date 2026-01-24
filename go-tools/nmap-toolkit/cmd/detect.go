@@ -97,7 +97,7 @@ var aggressiveDetectCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(detectCmd)
+	RootCmd.AddCommand(detectCmd)
 
 	detectCmd.AddCommand(serviceDetectCmd)
 	detectCmd.AddCommand(osDetectCmd)

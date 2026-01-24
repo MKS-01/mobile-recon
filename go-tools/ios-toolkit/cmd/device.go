@@ -46,7 +46,7 @@ var deviceInfoCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(deviceCmd)
+	RootCmd.AddCommand(deviceCmd)
 
 	deviceListCmd.Flags().BoolVarP(&showAll, "all", "a", false, "Show all simulators (including unavailable)")
 	deviceCmd.AddCommand(deviceListCmd)

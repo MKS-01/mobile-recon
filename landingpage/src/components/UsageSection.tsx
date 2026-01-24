@@ -10,7 +10,7 @@ const usageExamples = [
     title: 'Quick Start',
     commands: [
       { cmd: 'mobile-recon list', out: 'adb-toolkit, apk-analyzer, ios-toolkit, nmap-toolkit' },
-      { cmd: 'mobile-recon interactive', out: 'Starting interactive mode...' },
+      { cmd: 'mobile-recon adb device list', out: 'emulator-5554  device' },
     ],
   },
   {

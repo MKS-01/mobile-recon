@@ -2,11 +2,20 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
+
+// getShortName derives a short command name from the tool name
+func getShortName(toolName string) string {
+	name := toolName
+	name = strings.TrimSuffix(name, "-toolkit")
+	name = strings.TrimSuffix(name, "-analyzer")
+	return name
+}
 
 var (
 	showAll bool
@@ -55,7 +64,7 @@ func listTools() {
 
 			fmt.Printf("  %-20s %s\n", color.CyanString(tool.DisplayName), status)
 			fmt.Printf("  %-20s %s\n", "", infoColor.Sprint(tool.Description))
-			fmt.Printf("  %-20s %s %s\n", "", infoColor.Sprint("Command:"), color.HiWhiteString("mobile-recon run %s", tool.Name))
+			fmt.Printf("  %-20s %s %s\n", "", infoColor.Sprint("Command:"), color.HiWhiteString("mobile-recon %s", getShortName(tool.Name)))
 			fmt.Println()
 		}
 	}
@@ -70,7 +79,6 @@ func listTools() {
 	fmt.Println()
 	fmt.Printf("  Build a tool:     %s\n", color.HiWhiteString("mobile-recon build <tool-name>"))
 	fmt.Printf("  Build all tools:  %s\n", color.HiWhiteString("mobile-recon build --all"))
-	fmt.Printf("  Run a tool:       %s\n", color.HiWhiteString("mobile-recon run <tool-name> [args...]"))
-	fmt.Printf("  Interactive mode: %s\n", color.HiWhiteString("mobile-recon interactive"))
+	fmt.Printf("  Run a tool:       %s\n", color.HiWhiteString("mobile-recon <tool> [args...]"))
 	fmt.Println()
 }
