@@ -106,7 +106,7 @@ var scriptScanCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(vulnCmd)
+	RootCmd.AddCommand(vulnCmd)
 
 	vulnCmd.AddCommand(vulnScanCmd)
 	vulnCmd.AddCommand(sslScanCmd)

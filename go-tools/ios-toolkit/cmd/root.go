@@ -12,9 +12,10 @@ import (
 var (
 	simulatorUDID string
 
-	rootCmd = &cobra.Command{
-		Use:   "ios-toolkit",
-		Short: "iOS Simulator toolkit for development and security testing",
+	// RootCmd is the root command for iOS toolkit (exported for embedding)
+	RootCmd = &cobra.Command{
+		Use:   "ios",
+		Short: "iOS Simulator toolkit",
 		Long: `A comprehensive toolkit for iOS Simulator operations.
 Perfect for day-to-day development tasks, debugging, and security research.
 
@@ -34,14 +35,14 @@ Key Features:
 
 // Execute runs the root command.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		output.Error("%v", err)
 		os.Exit(1)
 	}
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&simulatorUDID, "udid", "u", "", "Target simulator UDID")
+	RootCmd.PersistentFlags().StringVarP(&simulatorUDID, "udid", "u", "", "Target simulator UDID")
 }
 
 // getTargetSimulator returns the target simulator (from flag or default booted).

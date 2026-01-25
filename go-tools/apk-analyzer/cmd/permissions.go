@@ -35,7 +35,7 @@ Examples:
 }
 
 func init() {
-	rootCmd.AddCommand(permissionsCmd)
+	RootCmd.AddCommand(permissionsCmd)
 	permissionsCmd.Flags().BoolVarP(&dangerousOnly, "dangerous", "d", false, "Show only dangerous permissions")
 }
 

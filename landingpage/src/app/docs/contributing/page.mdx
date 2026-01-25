@@ -1,0 +1,100 @@
+# Contributing
+
+Help improve mobile-recon by contributing code, documentation, or bug reports.
+
+## Getting Started
+
+### Fork & Clone
+
+```bash
+git clone https://github.com/YOUR_USERNAME/mobile-recon.git
+cd mobile-recon
+```
+
+### Create Branch
+
+```bash
+git checkout -b feature/my-new-feature
+```
+
+## Project Structure
+
+```
+mobile-recon/
+├── go-tools/
+│   ├── mobile-recon-cli/    # Main unified CLI
+│   ├── adb-toolkit/         # ADB commands
+│   ├── apk-analyzer/        # APK analysis
+│   ├── ios-toolkit/         # iOS commands
+│   ├── nmap-toolkit/        # Network scanning
+│   └── common/              # Shared utilities
+├── scripts/
+│   └── install.sh           # Installation script
+└── landingpage/             # Documentation site
+```
+
+## Development Workflow
+
+### Build the CLI
+
+```bash
+cd go-tools/mobile-recon-cli
+go mod tidy
+go build -o mobile-recon
+```
+
+### Test Changes
+
+```bash
+./mobile-recon --help
+./mobile-recon adb --help
+./mobile-recon apk --help
+```
+
+### Install Locally
+
+```bash
+mv mobile-recon ~/go/bin/
+```
+
+Or use the install script:
+
+```bash
+./scripts/install.sh
+```
+
+## Code Style
+
+- Follow Go conventions
+- Use `gofmt` for formatting
+- Add comments for exported functions
+- Include tests for new features
+
+## Pull Requests
+
+1. Ensure tests pass
+2. Update documentation
+3. Add entry to CHANGELOG
+4. Submit PR with clear description
+
+## Reporting Issues
+
+Use GitHub Issues for:
+- Bug reports
+- Feature requests
+- Documentation improvements
+
+Include:
+- mobile-recon version
+- OS and version
+- Steps to reproduce
+- Expected vs actual behavior
+
+## License
+
+Contributions are licensed under MIT.
+
+## Resources
+
+- [GitHub Repository](https://github.com/MKS-01/mobile-recon)
+- [Issue Tracker](https://github.com/MKS-01/mobile-recon/issues)

@@ -35,7 +35,7 @@ Examples:
 }
 
 func init() {
-	rootCmd.AddCommand(manifestCmd)
+	RootCmd.AddCommand(manifestCmd)
 	manifestCmd.Flags().BoolVarP(&extractManifest, "extract", "e", false, "Extract raw manifest to file")
 	manifestCmd.Flags().StringVar(&manifestOutput, "file", "AndroidManifest.xml", "Output file for extraction")
 }

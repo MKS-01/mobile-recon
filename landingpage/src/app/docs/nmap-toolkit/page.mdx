@@ -1,0 +1,155 @@
+# Nmap Toolkit
+
+Advanced network reconnaissance with mobile-specific scanning capabilities.
+
+## Overview
+
+The Nmap Toolkit wraps Nmap functionality with mobile-focused features, making it easy to discover devices, scan networks, and identify vulnerabilities relevant to mobile security testing.
+
+## Quick Scans
+
+### Host Discovery
+
+```bash
+mobile-recon nmap scan quick 192.168.1.0/24
+```
+
+Fast ping scan to discover live hosts on a network.
+
+### Port Scanning
+
+```bash
+mobile-recon nmap scan port 192.168.1.100
+```
+
+Scans common ports on the target.
+
+## Service Detection
+
+### Version Detection
+
+```bash
+mobile-recon nmap detect service 192.168.1.100
+```
+
+Identifies service versions on open ports.
+
+### OS Fingerprinting
+
+```bash
+sudo mobile-recon nmap detect os 192.168.1.100
+```
+
+### Aggressive Scan
+
+```bash
+mobile-recon nmap detect aggressive 192.168.1.100
+```
+
+Combines OS detection, version detection, script scanning, and traceroute.
+
+## Mobile-Specific Scans
+
+### Android ADB Discovery
+
+```bash
+mobile-recon nmap mobile adb 192.168.1.0/24
+```
+
+Finds Android devices with ADB enabled on the network (port 5555).
+
+### iOS Device Detection
+
+```bash
+mobile-recon nmap mobile ios 192.168.1.0/24
+```
+
+Discovers iOS devices via mDNS/Bonjour.
+
+### Mobile Port Scan
+
+```bash
+mobile-recon nmap mobile scan 192.168.1.1
+```
+
+Scans common ports used by mobile devices and apps.
+
+## Vulnerability Scanning
+
+### Basic Vuln Scan
+
+```bash
+mobile-recon nmap vuln scan 192.168.1.100
+```
+
+Runs NSE vulnerability scripts.
+
+### SSL/TLS Analysis
+
+```bash
+mobile-recon nmap vuln ssl 192.168.1.100
+```
+
+Analyzes SSL/TLS configuration:
+- Supported protocols
+- Cipher suites
+- Certificate details
+- Known vulnerabilities (POODLE, BEAST, etc.)
+
+## UDP Scanning
+
+```bash
+mobile-recon nmap scan udp 192.168.1.100
+```
+
+Scans UDP ports (requires root).
+
+## Stealth Scanning
+
+```bash
+sudo mobile-recon nmap scan stealth 192.168.1.100
+```
+
+SYN stealth scan (requires root privileges).
+
+## Example Workflows
+
+### Network Assessment
+
+```bash
+# 1. Discover hosts
+mobile-recon nmap scan quick 192.168.1.0/24
+
+# 2. Identify services
+mobile-recon nmap detect service 192.168.1.100
+
+# 3. Check vulnerabilities
+mobile-recon nmap vuln scan 192.168.1.100
+
+# 4. Analyze SSL
+mobile-recon nmap vuln ssl 192.168.1.100
+```
+
+### Mobile Pentest Recon
+
+```bash
+# 1. Find mobile devices
+mobile-recon nmap mobile adb 192.168.1.0/24
+mobile-recon nmap mobile ios 192.168.1.0/24
+
+# 2. Scan mobile-specific ports
+mobile-recon nmap mobile scan 192.168.1.50
+
+# 3. Deep service detection
+mobile-recon nmap detect aggressive api.targetapp.com
+```
+
+## Requirements
+
+- Nmap installed (`nmap --version`)
+- Root/sudo for certain scan types (SYN, OS detection, UDP)
+
+## Next Steps
+
+- [ADB Toolkit](/docs/adb-toolkit) - Connect to discovered Android devices
+- [iOS Toolkit](/docs/ios-toolkit) - Test discovered iOS devices

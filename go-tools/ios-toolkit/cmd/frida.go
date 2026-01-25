@@ -110,7 +110,7 @@ var fridaKillCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(fridaCmd)
+	RootCmd.AddCommand(fridaCmd)
 
 	fridaCmd.AddCommand(fridaSetupCmd)
 	fridaCmd.AddCommand(fridaPsCmd)

@@ -396,7 +396,7 @@ var reconProcsCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(reconCmd)
+	RootCmd.AddCommand(reconCmd)
 
 	reconCmd.AddCommand(reconLogcatCmd)
 	reconLogcatCmd.Flags().BoolP("clear", "c", false, "Clear logcat buffer")

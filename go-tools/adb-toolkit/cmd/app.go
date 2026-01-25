@@ -299,7 +299,7 @@ var appPullCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(appCmd)
+	RootCmd.AddCommand(appCmd)
 
 	appCmd.AddCommand(appListCmd)
 	appListCmd.Flags().BoolVarP(&thirdPartyOnly, "third-party", "3", false, "Show only third-party apps")

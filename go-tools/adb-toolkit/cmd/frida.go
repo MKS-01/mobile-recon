@@ -56,7 +56,7 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(fridaCmd)
+	RootCmd.AddCommand(fridaCmd)
 
 	fridaSetupCmd.Flags().BoolVarP(&forceDownload, "force", "f", false, "Force re-download of Frida server")
 	fridaSetupCmd.Flags().StringVarP(&fridaVersion, "version", "v", "", "Specific Frida version (default: latest)")

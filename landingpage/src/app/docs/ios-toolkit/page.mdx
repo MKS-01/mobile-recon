@@ -1,0 +1,122 @@
+# iOS Toolkit
+
+iOS simulator management with Frida integration for dynamic instrumentation.
+
+## Overview
+
+The iOS Toolkit provides tools for testing iOS applications in simulator environments. It leverages Frida for dynamic instrumentation without requiring a jailbroken device.
+
+## Device Management
+
+### List Simulators
+
+```bash
+mobile-recon ios device list
+```
+
+Shows all available simulators with their state (booted/shutdown).
+
+Include unavailable simulators:
+
+```bash
+mobile-recon ios device list -a
+```
+
+### Boot Simulator
+
+```bash
+mobile-recon ios device boot <udid>
+```
+
+### Shutdown Simulator
+
+```bash
+mobile-recon ios device shutdown <udid>
+```
+
+### Device Info
+
+```bash
+mobile-recon ios device info
+```
+
+## Frida Integration
+
+### Setup Frida
+
+```bash
+mobile-recon ios frida setup
+```
+
+Verifies Frida is properly installed and accessible.
+
+### List Processes
+
+```bash
+mobile-recon ios frida ps
+```
+
+### List Apps
+
+```bash
+mobile-recon ios frida apps
+```
+
+### Attach to Process
+
+```bash
+mobile-recon ios frida attach <pid>
+```
+
+### Spawn with Frida
+
+```bash
+mobile-recon ios frida spawn <bundle-id>
+```
+
+Spawns the app in suspended state for early instrumentation.
+
+## Example Workflows
+
+### Basic App Testing
+
+```bash
+# 1. List simulators
+mobile-recon ios device list
+
+# 2. Boot simulator
+mobile-recon ios device boot <udid>
+
+# 3. List running apps
+mobile-recon ios frida apps
+```
+
+### Dynamic Analysis with Frida
+
+```bash
+# 1. List processes
+mobile-recon ios frida ps
+
+# 2. Attach to process
+mobile-recon ios frida attach <pid>
+
+# 3. Or spawn app
+mobile-recon ios frida spawn com.example.myapp
+```
+
+## Limitations
+
+- **Simulator Only** - Physical devices require additional setup
+- **No Keychain Protection** - Simulator keychain has weaker protection
+- **Some APIs Unavailable** - Push notifications, certain sensors
+
+## Requirements
+
+- Xcode installed
+- Frida (`pip install frida-tools`)
+- iOS Simulator runtime
+
+## Next Steps
+
+- [Frida Integration](/docs/frida-integration) - Advanced hooking
+- [ADB Toolkit](/docs/adb-toolkit) - Android equivalent

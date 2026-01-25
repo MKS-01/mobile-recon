@@ -82,7 +82,7 @@ func buildTool(toolName string) {
 
 	output.Success("Successfully built %s", tool.DisplayName)
 	fmt.Println()
-	output.Info("Run with: mobile-recon run %s [args...]", tool.Name)
+	output.Info("Run with: mobile-recon %s [args...]", getShortName(tool.Name))
 	fmt.Println()
 }
 

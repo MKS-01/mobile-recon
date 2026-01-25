@@ -19,3 +19,10 @@ tools:
     binary: apk-analyzer
     description: Android APK static analysis toolkit
     category: Mobile
+
+  - name: ios-toolkit
+    display_name: iOS Toolkit
+    dir: ios-toolkit
+    binary: ios-toolkit
+    description: iOS simulator management and Frida integration
+    category: Mobile

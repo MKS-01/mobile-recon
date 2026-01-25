@@ -149,7 +149,7 @@ var networkScanCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(scanCmd)
+	RootCmd.AddCommand(scanCmd)
 
 	scanCmd.AddCommand(quickScanCmd)
 	scanCmd.AddCommand(portScanCmd)
