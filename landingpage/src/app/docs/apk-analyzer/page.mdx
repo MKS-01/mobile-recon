@@ -11,7 +11,7 @@ APK Analyzer performs deep inspection of Android APK files without needing a dev
 ### APK Information
 
 ```bash
-apk-analyzer info app.apk
+mobile-recon apk info app.apk
 ```
 
 Output includes:
@@ -23,7 +23,7 @@ Output includes:
 ### Permission Analysis
 
 ```bash
-apk-analyzer permissions app.apk
+mobile-recon apk permissions app.apk
 ```
 
 Categorizes permissions by risk level:
@@ -31,25 +31,18 @@ Categorizes permissions by risk level:
 - **Signature** - System-level permissions
 - **Normal** - Low-risk permissions
 
-## Security Analysis
-
-### Hardcoded Secrets Detection
+Filter dangerous permissions only:
 
 ```bash
-apk-analyzer secrets app.apk
+mobile-recon apk permissions -d app.apk
 ```
 
-Scans for:
-- AWS credentials (Access keys, Secret keys)
-- API keys and tokens
-- Private keys (RSA, EC)
-- Firebase configurations
-- Generic secrets patterns
+## Security Analysis
 
-### Security Misconfigurations
+### Security Check
 
 ```bash
-apk-analyzer security app.apk
+mobile-recon apk security app.apk
 ```
 
 Checks for:
@@ -59,49 +52,27 @@ Checks for:
 - Exported components without permissions
 - Weak crypto implementations
 
-## Manifest Analysis
-
-### Parse AndroidManifest.xml
+### Manifest Analysis
 
 ```bash
-apk-analyzer manifest app.apk
+mobile-recon apk manifest app.apk
 ```
 
-### List Components
-
-```bash
-# Activities
-apk-analyzer activities app.apk
-
-# Services
-apk-analyzer services app.apk
-
-# Receivers
-apk-analyzer receivers app.apk
-
-# Providers
-apk-analyzer providers app.apk
-```
+Parses and displays the AndroidManifest.xml.
 
 ## String Extraction
 
 ### Extract All Strings
 
 ```bash
-apk-analyzer strings app.apk
+mobile-recon apk strings app.apk
 ```
 
 ### Filter Strings
 
 ```bash
 # URLs only
-apk-analyzer strings app.apk --filter url
-
-# IPs
-apk-analyzer strings app.apk --filter ip
-
-# Emails
-apk-analyzer strings app.apk --filter email
+mobile-recon apk strings --urls app.apk
 ```
 
 ## File Inspection
@@ -109,44 +80,35 @@ apk-analyzer strings app.apk --filter email
 ### List APK Contents
 
 ```bash
-apk-analyzer files app.apk
+mobile-recon apk files app.apk
 ```
 
-### Extract Specific Files
+### Show File Tree
 
 ```bash
-apk-analyzer extract app.apk --file classes.dex --output ./output
-```
-
-## Native Libraries
-
-### List Native Libs
-
-```bash
-apk-analyzer native app.apk
-```
-
-### Analyze Native Strings
-
-```bash
-apk-analyzer native-strings app.apk
+mobile-recon apk files --tree app.apk
 ```
 
 ## Full Security Audit
 
-### Comprehensive Scan
+### Complete Workflow
 
 ```bash
-apk-analyzer audit app.apk --output report.json
-```
+# 1. Pull APK from device
+mobile-recon adb app pull com.target.app
 
-This runs all checks and generates a detailed report including:
-- Basic info
-- All permissions with risk assessment
-- Security misconfigurations
-- Detected secrets
-- Exported components
-- Network security config analysis
+# 2. Get basic info
+mobile-recon apk info com.target.app.apk
+
+# 3. Check permissions
+mobile-recon apk permissions com.target.app.apk
+
+# 4. Run security analysis
+mobile-recon apk security com.target.app.apk
+
+# 5. Extract strings for secrets
+mobile-recon apk strings com.target.app.apk
+```
 
 ## Examples
 
@@ -154,31 +116,21 @@ This runs all checks and generates a detailed report including:
 
 ```bash
 # Pull APK from device
-adb-toolkit app pull-apk com.target.app
+mobile-recon adb app pull com.target.app
 
 # Run security scan
-apk-analyzer secrets com.target.app.apk
-apk-analyzer security com.target.app.apk
+mobile-recon apk security com.target.app.apk
+mobile-recon apk strings com.target.app.apk
 ```
 
-### CI/CD Integration
+### Permission Audit
 
 ```bash
-# Exit with error code if issues found
-apk-analyzer audit app.apk --fail-on-secrets --fail-on-debug
-```
+# Full permissions
+mobile-recon apk permissions app.apk
 
-## Output Formats
-
-```bash
-# JSON output
-apk-analyzer info app.apk --json
-
-# Pretty print
-apk-analyzer info app.apk --pretty
-
-# Quiet mode (errors only)
-apk-analyzer info app.apk --quiet
+# Dangerous only
+mobile-recon apk permissions -d app.apk
 ```
 
 ## Next Steps

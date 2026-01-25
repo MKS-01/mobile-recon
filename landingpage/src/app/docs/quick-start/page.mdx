@@ -16,11 +16,11 @@ mobile-recon list
 
 Output:
 ```
-Available tools:
-  - adb-toolkit      Android Debug Bridge toolkit
-  - apk-analyzer     Static APK analysis
-  - ios-toolkit      iOS simulator testing
-  - nmap-toolkit     Network reconnaissance
+Available Commands:
+  adb         Android Debug Bridge toolkit
+  apk         Android APK static analysis toolkit
+  ios         iOS Simulator toolkit
+  nmap        Network reconnaissance toolkit
 ```
 
 ### 2. Quick Device Check
@@ -29,8 +29,6 @@ Check connected Android devices:
 
 ```bash
 mobile-recon adb device list
-# or directly
-adb-toolkit device list
 ```
 
 ## Common Workflows
@@ -39,48 +37,48 @@ adb-toolkit device list
 
 ```bash
 # 1. List devices
-adb-toolkit device list
+mobile-recon adb device list
 
 # 2. Find target app
-adb-toolkit app list-packages --third-party
+mobile-recon adb app list
 
 # 3. Extract APK
-adb-toolkit app pull-apk com.target.app
+mobile-recon adb app pull com.target.app
 
 # 4. Analyze for secrets
-apk-analyzer secrets com.target.app.apk
+mobile-recon apk strings com.target.app.apk
 
 # 5. Monitor logs
-adb-toolkit log logcat --package com.target.app
+mobile-recon adb recon logcat
 ```
 
 ### Network Reconnaissance
 
 ```bash
 # 1. Quick network scan
-nmap-toolkit scan quick 192.168.1.0/24
+mobile-recon nmap scan quick 192.168.1.0/24
 
 # 2. Find Android devices
-nmap-toolkit mobile-scan android-adb 192.168.1.0/24
+mobile-recon nmap mobile adb 192.168.1.0/24
 
 # 3. Deep service scan
-nmap-toolkit scan ports 192.168.1.100 --ports 1-10000
+mobile-recon nmap detect service 192.168.1.100
 ```
 
 ### APK Security Audit
 
 ```bash
 # Full security analysis
-apk-analyzer info app.apk
-apk-analyzer permissions app.apk
-apk-analyzer secrets app.apk
-apk-analyzer security app.apk
+mobile-recon apk info app.apk
+mobile-recon apk permissions app.apk
+mobile-recon apk strings app.apk
+mobile-recon apk security app.apk
 ```
 
 ## Tips
 
 - Use `--help` on any command for detailed options
-- Most tools support JSON output with `--json` flag
+- All tools are unified under the `mobile-recon` command
 - Enable verbose mode with `-v` for debugging
 
 ## Next Steps

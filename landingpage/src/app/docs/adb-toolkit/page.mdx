@@ -11,22 +11,20 @@ The ADB Toolkit provides a comprehensive set of commands for interacting with An
 ### List Devices
 
 ```bash
-adb-toolkit device list
+mobile-recon adb device list
 ```
 
 ### Device Information
 
 ```bash
-adb-toolkit device info
-adb-toolkit device props
+mobile-recon adb device info
 ```
 
-### Reboot Options
+### Screenshot & Recording
 
 ```bash
-adb-toolkit device reboot           # Normal reboot
-adb-toolkit device reboot recovery  # Boot to recovery
-adb-toolkit device reboot bootloader
+mobile-recon adb device screenshot
+mobile-recon adb device screenrecord
 ```
 
 ## Application Management
@@ -34,88 +32,39 @@ adb-toolkit device reboot bootloader
 ### List Packages
 
 ```bash
-# All packages
-adb-toolkit app list-packages
-
-# Third-party apps only
-adb-toolkit app list-packages --third-party
-
-# System apps only
-adb-toolkit app list-packages --system
+mobile-recon adb app list
 ```
 
 ### Install & Uninstall
 
 ```bash
-adb-toolkit app install app.apk
-adb-toolkit app uninstall com.example.app
-```
-
-### Launch & Stop
-
-```bash
-adb-toolkit app launch com.example.app
-adb-toolkit app force-stop com.example.app
-adb-toolkit app clear-data com.example.app
+mobile-recon adb app install app.apk
+mobile-recon adb app uninstall com.example.app
 ```
 
 ### Extract APKs
 
 ```bash
-adb-toolkit app pull-apk com.example.app
+mobile-recon adb app pull com.example.app
 ```
 
 ## Security Analysis
 
-### Package Dump
+### Package Reconnaissance
 
 ```bash
-# Full package info
-adb-toolkit recon dump-package com.target.app
-
-# List activities
-adb-toolkit recon list-activities com.target.app
-
-# List services
-adb-toolkit recon list-services com.target.app
-
-# List receivers
-adb-toolkit recon list-receivers com.target.app
+# View package details
+mobile-recon adb recon packages com.target.app
 ```
 
-### Data Extraction (Root Required)
-
-```bash
-# Extract app databases
-adb-toolkit recon extract-db com.target.app
-
-# Extract shared preferences
-adb-toolkit recon extract-prefs com.target.app
-
-# Extract all app files
-adb-toolkit recon extract-files com.target.app
-```
-
-## Monitoring
-
-### Logcat
+### Log Monitoring
 
 ```bash
 # All logs
-adb-toolkit log logcat
+mobile-recon adb recon logcat
 
 # Filter by package
-adb-toolkit log logcat --package com.target.app
-
-# Filter by tag
-adb-toolkit log logcat --tag MyTag
-```
-
-### Process & Network
-
-```bash
-adb-toolkit recon list-processes
-adb-toolkit recon net-connections
+mobile-recon adb recon logcat --package com.target.app
 ```
 
 ## Input Simulation
@@ -123,40 +72,27 @@ adb-toolkit recon net-connections
 ### Text & Tap
 
 ```bash
-adb-toolkit input text "Hello World"
-adb-toolkit input tap 500 800
-adb-toolkit input swipe 100 500 400 500
+mobile-recon adb input text "Hello World"
+mobile-recon adb input tap 500 800
+mobile-recon adb input swipe 100 500 400 500
 ```
 
 ### Key Events
 
 ```bash
-adb-toolkit input keyevent BACK
-adb-toolkit input keyevent HOME
-adb-toolkit input keyevent ENTER
-```
-
-## Screenshots & Recording
-
-```bash
-adb-toolkit device screenshot
-adb-toolkit device screenrecord --duration 30
+mobile-recon adb input keyevent BACK
+mobile-recon adb input keyevent HOME
+mobile-recon adb input keyevent ENTER
 ```
 
 ## Frida Integration
 
 ```bash
-# Check Frida server status
-adb-toolkit frida check
-
-# Start Frida server
-adb-toolkit frida start
+# Install Frida server
+mobile-recon adb frida setup
 
 # List running processes
-adb-toolkit frida list-processes
-
-# Generate trace command
-adb-toolkit frida trace com.target.app
+mobile-recon adb frida ps
 ```
 
 ## Examples
@@ -165,19 +101,20 @@ adb-toolkit frida trace com.target.app
 
 ```bash
 # 1. Connect to device
-adb-toolkit device list
+mobile-recon adb device list
 
 # 2. Find target app
-adb-toolkit app list-packages --third-party | grep target
+mobile-recon adb app list
 
 # 3. Extract APK for analysis
-adb-toolkit app pull-apk com.target.app
+mobile-recon adb app pull com.target.app
 
-# 4. Dump package info
-adb-toolkit recon dump-package com.target.app
+# 4. Analyze APK
+mobile-recon apk info com.target.app.apk
+mobile-recon apk permissions com.target.app.apk
 
 # 5. Monitor runtime behavior
-adb-toolkit log logcat --package com.target.app
+mobile-recon adb recon logcat
 ```
 
 ## Next Steps

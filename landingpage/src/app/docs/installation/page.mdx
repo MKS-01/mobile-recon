@@ -11,7 +11,7 @@ Before installing mobile-recon, ensure you have the following:
 - **ADB** - For Android device testing (optional)
 - **Nmap** - For network scanning (optional)
 
-## Quick Install
+## Quick Install (Recommended)
 
 The fastest way to get started:
 
@@ -22,8 +22,8 @@ cd mobile-recon
 ```
 
 This script will:
-1. Build all toolkits
-2. Install binaries to your `$GOPATH/bin`
+1. Build the unified CLI (all tools included)
+2. Install the binary to `$GOPATH/bin`
 3. Set up shell completions
 
 ## Manual Installation
@@ -32,43 +32,30 @@ This script will:
 
 ```bash
 git clone https://github.com/MKS-01/mobile-recon.git
-cd mobile-recon
-go build -o mobile-recon ./cmd/mobile-recon-cli
-sudo mv mobile-recon /usr/local/bin/
-```
-
-### Build Individual Tools
-
-```bash
-# ADB Toolkit
-go build -o adb-toolkit ./tools/adb-toolkit
-
-# APK Analyzer
-go build -o apk-analyzer ./tools/apk-analyzer
-
-# iOS Toolkit
-go build -o ios-toolkit ./tools/ios-toolkit
-
-# Nmap Toolkit
-go build -o nmap-toolkit ./tools/nmap-toolkit
-```
-
-## Go Install
-
-If you have Go configured:
-
-```bash
-go install github.com/MKS-01/mobile-recon/cmd/mobile-recon-cli@latest
+cd mobile-recon/go-tools/mobile-recon-cli
+go build -o mobile-recon
+mv mobile-recon ~/go/bin/
 ```
 
 ## Verify Installation
 
 ```bash
-mobile-recon --version
-# Output: mobile-recon v1.0.0
+mobile-recon --help
+# Shows all available commands
 
 mobile-recon list
 # Lists all available tools
+```
+
+## Available Commands
+
+After installation, all tools are accessed via the unified `mobile-recon` command:
+
+```bash
+mobile-recon adb   # Android Debug Bridge toolkit
+mobile-recon apk   # APK static analysis toolkit
+mobile-recon ios   # iOS Simulator toolkit
+mobile-recon nmap  # Network reconnaissance toolkit
 ```
 
 ## Platform-Specific Notes
@@ -78,14 +65,14 @@ mobile-recon list
 Install dependencies via Homebrew:
 
 ```bash
-brew install go adb nmap
+brew install go android-platform-tools nmap
 ```
 
 ### Linux (Ubuntu/Debian)
 
 ```bash
 sudo apt update
-sudo apt install golang android-tools-adb nmap
+sudo apt install golang adb nmap
 ```
 
 ### Windows

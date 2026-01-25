@@ -17,36 +17,50 @@ cd mobile-recon
 git checkout -b feature/my-new-feature
 ```
 
-## Adding New Tools
+## Project Structure
 
-### Generate Tool Scaffold
-
-```bash
-./scripts/new-tool.sh my-toolkit
+```
+mobile-recon/
+├── go-tools/
+│   ├── mobile-recon-cli/    # Main unified CLI
+│   ├── adb-toolkit/         # ADB commands
+│   ├── apk-analyzer/        # APK analysis
+│   ├── ios-toolkit/         # iOS commands
+│   ├── nmap-toolkit/        # Network scanning
+│   └── common/              # Shared utilities
+├── scripts/
+│   └── install.sh           # Installation script
+└── landingpage/             # Documentation site
 ```
 
-This creates:
-- `tools/my-toolkit/` - Tool directory
-- `tools/my-toolkit/cmd/` - Command structure
-- `tools/my-toolkit/main.go` - Entry point
+## Development Workflow
 
-### Register Tool
-
-Add to `tools.yaml`:
-
-```yaml
-tools:
-  my-toolkit:
-    name: "My Toolkit"
-    description: "Description here"
-    path: "./tools/my-toolkit"
-```
-
-### Build & Test
+### Build the CLI
 
 ```bash
-go build -o my-toolkit ./tools/my-toolkit
-./my-toolkit --help
+cd go-tools/mobile-recon-cli
+go mod tidy
+go build -o mobile-recon
+```
+
+### Test Changes
+
+```bash
+./mobile-recon --help
+./mobile-recon adb --help
+./mobile-recon apk --help
+```
+
+### Install Locally
+
+```bash
+mv mobile-recon ~/go/bin/
+```
+
+Or use the install script:
+
+```bash
+./scripts/install.sh
 ```
 
 ## Code Style

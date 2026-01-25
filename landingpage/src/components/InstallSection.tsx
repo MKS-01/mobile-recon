@@ -21,16 +21,8 @@ const installMethods = [
     icon: Terminal,
     commands: [
       'git clone https://github.com/MKS-01/mobile-recon.git',
-      'cd mobile-recon',
-      'go build -o mobile-recon ./cmd/mobile-recon-cli',
-    ],
-  },
-  {
-    id: 'go',
-    label: 'Go Install',
-    icon: Package,
-    commands: [
-      'go install github.com/MKS-01/mobile-recon/cmd/mobile-recon-cli@latest',
+      'cd mobile-recon/go-tools/mobile-recon-cli',
+      'go build -o mobile-recon && mv mobile-recon ~/go/bin/',
     ],
   },
 ];

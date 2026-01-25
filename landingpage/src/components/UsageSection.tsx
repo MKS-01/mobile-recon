@@ -9,29 +9,29 @@ const usageExamples = [
   {
     title: 'Quick Start',
     commands: [
-      { cmd: 'mobile-recon list', out: 'adb-toolkit, apk-analyzer, ios-toolkit, nmap-toolkit' },
+      { cmd: 'mobile-recon list', out: 'adb, apk, ios, nmap' },
       { cmd: 'mobile-recon adb device list', out: 'emulator-5554  device' },
     ],
   },
   {
     title: 'Android',
     commands: [
-      { cmd: 'adb-toolkit device list', out: 'emulator-5554  device' },
-      { cmd: 'adb-toolkit app pull-apk com.target.app', out: 'Saved: com.target.app.apk' },
+      { cmd: 'mobile-recon adb device list', out: 'emulator-5554  device' },
+      { cmd: 'mobile-recon adb app pull com.target.app', out: 'Saved: com.target.app.apk' },
     ],
   },
   {
     title: 'Analysis',
     commands: [
-      { cmd: 'apk-analyzer secrets app.apk', out: 'Found 3 potential secrets...' },
-      { cmd: 'apk-analyzer permissions app.apk', out: '12 dangerous permissions' },
+      { cmd: 'mobile-recon apk strings app.apk', out: 'Found 3 potential secrets...' },
+      { cmd: 'mobile-recon apk permissions app.apk', out: '12 dangerous permissions' },
     ],
   },
   {
     title: 'Network',
     commands: [
-      { cmd: 'nmap-toolkit scan quick 192.168.1.0/24', out: 'Discovered 8 hosts' },
-      { cmd: 'nmap-toolkit mobile-scan android-adb 192.168.1.0/24', out: 'Found 2 ADB devices' },
+      { cmd: 'mobile-recon nmap scan quick 192.168.1.0/24', out: 'Discovered 8 hosts' },
+      { cmd: 'mobile-recon nmap mobile adb 192.168.1.0/24', out: 'Found 2 ADB devices' },
     ],
   },
 ];

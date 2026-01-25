@@ -11,55 +11,25 @@ The Nmap Toolkit wraps Nmap functionality with mobile-focused features, making i
 ### Host Discovery
 
 ```bash
-nmap-toolkit scan quick 192.168.1.0/24
+mobile-recon nmap scan quick 192.168.1.0/24
 ```
 
 Fast ping scan to discover live hosts on a network.
 
-### Common Ports
+### Port Scanning
 
 ```bash
-nmap-toolkit scan common 192.168.1.100
+mobile-recon nmap scan port 192.168.1.100
 ```
 
-Scans the most common 1000 ports.
-
-## Port Scanning
-
-### TCP Scan
-
-```bash
-nmap-toolkit scan ports 192.168.1.100 --ports 1-10000
-```
-
-### UDP Scan
-
-```bash
-nmap-toolkit scan udp 192.168.1.100 --ports 53,67,68,161
-```
-
-### SYN Stealth Scan
-
-```bash
-sudo nmap-toolkit scan syn 192.168.1.100
-```
-
-Requires root privileges.
-
-### All Ports
-
-```bash
-nmap-toolkit scan all-ports 192.168.1.100
-```
-
-Scans all 65535 ports.
+Scans common ports on the target.
 
 ## Service Detection
 
 ### Version Detection
 
 ```bash
-nmap-toolkit detect version 192.168.1.100
+mobile-recon nmap detect service 192.168.1.100
 ```
 
 Identifies service versions on open ports.
@@ -67,13 +37,13 @@ Identifies service versions on open ports.
 ### OS Fingerprinting
 
 ```bash
-sudo nmap-toolkit detect os 192.168.1.100
+sudo mobile-recon nmap detect os 192.168.1.100
 ```
 
 ### Aggressive Scan
 
 ```bash
-nmap-toolkit scan aggressive 192.168.1.100
+mobile-recon nmap detect aggressive 192.168.1.100
 ```
 
 Combines OS detection, version detection, script scanning, and traceroute.
@@ -83,7 +53,7 @@ Combines OS detection, version detection, script scanning, and traceroute.
 ### Android ADB Discovery
 
 ```bash
-nmap-toolkit mobile-scan android-adb 192.168.1.0/24
+mobile-recon nmap mobile adb 192.168.1.0/24
 ```
 
 Finds Android devices with ADB enabled on the network (port 5555).
@@ -91,33 +61,25 @@ Finds Android devices with ADB enabled on the network (port 5555).
 ### iOS Device Detection
 
 ```bash
-nmap-toolkit mobile-scan ios 192.168.1.0/24
+mobile-recon nmap mobile ios 192.168.1.0/24
 ```
 
 Discovers iOS devices via mDNS/Bonjour.
 
-### Mobile Proxy Detection
+### Mobile Port Scan
 
 ```bash
-nmap-toolkit mobile-scan proxy 192.168.1.0/24
+mobile-recon nmap mobile scan 192.168.1.1
 ```
 
-Finds MITM proxies (Burp Suite, Charles, mitmproxy) on the network.
-
-### Mobile Backend Scan
-
-```bash
-nmap-toolkit mobile-scan backend api.example.com
-```
-
-Scans common ports used by mobile app backends.
+Scans common ports used by mobile devices and apps.
 
 ## Vulnerability Scanning
 
 ### Basic Vuln Scan
 
 ```bash
-nmap-toolkit vuln scan 192.168.1.100
+mobile-recon nmap vuln scan 192.168.1.100
 ```
 
 Runs NSE vulnerability scripts.
@@ -125,7 +87,7 @@ Runs NSE vulnerability scripts.
 ### SSL/TLS Analysis
 
 ```bash
-nmap-toolkit vuln ssl 192.168.1.100:443
+mobile-recon nmap vuln ssl 192.168.1.100
 ```
 
 Analyzes SSL/TLS configuration:
@@ -134,60 +96,21 @@ Analyzes SSL/TLS configuration:
 - Certificate details
 - Known vulnerabilities (POODLE, BEAST, etc.)
 
-### Web Vulnerabilities
+## UDP Scanning
 
 ```bash
-nmap-toolkit vuln web 192.168.1.100
+mobile-recon nmap scan udp 192.168.1.100
 ```
 
-Runs web-focused vulnerability scripts.
+Scans UDP ports (requires root).
 
-## NSE Scripts
-
-### List Categories
+## Stealth Scanning
 
 ```bash
-nmap-toolkit scripts list
+sudo mobile-recon nmap scan stealth 192.168.1.100
 ```
 
-### Run Specific Script
-
-```bash
-nmap-toolkit scripts run http-headers 192.168.1.100
-```
-
-### Run Category
-
-```bash
-nmap-toolkit scripts category auth 192.168.1.100
-```
-
-Categories: auth, broadcast, brute, discovery, dos, exploit, fuzzer, intrusive, malware, safe, version, vuln
-
-## Output Options
-
-### Save Results
-
-```bash
-nmap-toolkit scan common 192.168.1.100 --output results
-```
-
-Generates:
-- results.nmap (normal)
-- results.xml (XML)
-- results.gnmap (grepable)
-
-### JSON Output
-
-```bash
-nmap-toolkit scan common 192.168.1.100 --json
-```
-
-### Verbose Mode
-
-```bash
-nmap-toolkit scan common 192.168.1.100 -v
-```
+SYN stealth scan (requires root privileges).
 
 ## Example Workflows
 
@@ -195,70 +118,36 @@ nmap-toolkit scan common 192.168.1.100 -v
 
 ```bash
 # 1. Discover hosts
-nmap-toolkit scan quick 192.168.1.0/24
+mobile-recon nmap scan quick 192.168.1.0/24
 
 # 2. Identify services
-nmap-toolkit detect version 192.168.1.100
+mobile-recon nmap detect service 192.168.1.100
 
 # 3. Check vulnerabilities
-nmap-toolkit vuln scan 192.168.1.100
+mobile-recon nmap vuln scan 192.168.1.100
 
 # 4. Analyze SSL
-nmap-toolkit vuln ssl 192.168.1.100:443
+mobile-recon nmap vuln ssl 192.168.1.100
 ```
 
 ### Mobile Pentest Recon
 
 ```bash
 # 1. Find mobile devices
-nmap-toolkit mobile-scan android-adb 192.168.1.0/24
-nmap-toolkit mobile-scan ios 192.168.1.0/24
+mobile-recon nmap mobile adb 192.168.1.0/24
+mobile-recon nmap mobile ios 192.168.1.0/24
 
-# 2. Check for proxies
-nmap-toolkit mobile-scan proxy 192.168.1.0/24
+# 2. Scan mobile-specific ports
+mobile-recon nmap mobile scan 192.168.1.50
 
-# 3. Scan app backend
-nmap-toolkit scan aggressive api.targetapp.com
-```
-
-### API Server Assessment
-
-```bash
-# Common API ports
-nmap-toolkit scan ports api.example.com --ports 80,443,8080,8443,3000,5000
-
-# Service detection
-nmap-toolkit detect version api.example.com
-
-# SSL analysis
-nmap-toolkit vuln ssl api.example.com:443
-```
-
-## Performance Options
-
-### Timing Templates
-
-```bash
-# Paranoid (slowest, IDS evasion)
-nmap-toolkit scan common 192.168.1.100 --timing 0
-
-# Normal (default)
-nmap-toolkit scan common 192.168.1.100 --timing 3
-
-# Insane (fastest)
-nmap-toolkit scan common 192.168.1.100 --timing 5
-```
-
-### Parallelism
-
-```bash
-nmap-toolkit scan common 192.168.1.0/24 --min-parallelism 100
+# 3. Deep service detection
+mobile-recon nmap detect aggressive api.targetapp.com
 ```
 
 ## Requirements
 
 - Nmap installed (`nmap --version`)
-- Root/sudo for certain scan types (SYN, OS detection)
+- Root/sudo for certain scan types (SYN, OS detection, UDP)
 
 ## Next Steps
 

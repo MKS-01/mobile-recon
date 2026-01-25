@@ -1,77 +1,51 @@
 # iOS Toolkit
 
-iOS simulator automation with Frida integration for dynamic instrumentation.
+iOS simulator management with Frida integration for dynamic instrumentation.
 
 ## Overview
 
 The iOS Toolkit provides tools for testing iOS applications in simulator environments. It leverages Frida for dynamic instrumentation without requiring a jailbroken device.
 
-## Simulator Management
+## Device Management
 
 ### List Simulators
 
 ```bash
-ios-toolkit sim list
+mobile-recon ios device list
 ```
 
 Shows all available simulators with their state (booted/shutdown).
 
+Include unavailable simulators:
+
+```bash
+mobile-recon ios device list -a
+```
+
 ### Boot Simulator
 
 ```bash
-ios-toolkit sim boot "iPhone 15 Pro"
+mobile-recon ios device boot <udid>
 ```
 
 ### Shutdown Simulator
 
 ```bash
-ios-toolkit sim shutdown "iPhone 15 Pro"
+mobile-recon ios device shutdown <udid>
 ```
 
-### Delete Simulator
+### Device Info
 
 ```bash
-ios-toolkit sim delete "iPhone 15 Pro"
-```
-
-## App Management
-
-### List Installed Apps
-
-```bash
-ios-toolkit app list
-```
-
-### Install App
-
-```bash
-ios-toolkit app install MyApp.app
-```
-
-### Uninstall App
-
-```bash
-ios-toolkit app uninstall com.example.myapp
-```
-
-### Launch App
-
-```bash
-ios-toolkit app launch com.example.myapp
-```
-
-### Terminate App
-
-```bash
-ios-toolkit app terminate com.example.myapp
+mobile-recon ios device info
 ```
 
 ## Frida Integration
 
-### Check Frida
+### Setup Frida
 
 ```bash
-ios-toolkit frida check
+mobile-recon ios frida setup
 ```
 
 Verifies Frida is properly installed and accessible.
@@ -79,124 +53,55 @@ Verifies Frida is properly installed and accessible.
 ### List Processes
 
 ```bash
-ios-toolkit frida list-processes
+mobile-recon ios frida ps
+```
+
+### List Apps
+
+```bash
+mobile-recon ios frida apps
 ```
 
 ### Attach to Process
 
 ```bash
-ios-toolkit frida attach com.example.myapp
+mobile-recon ios frida attach <pid>
 ```
 
 ### Spawn with Frida
 
 ```bash
-ios-toolkit frida spawn com.example.myapp
+mobile-recon ios frida spawn <bundle-id>
 ```
 
 Spawns the app in suspended state for early instrumentation.
-
-### Method Tracing
-
-```bash
-ios-toolkit frida trace com.example.myapp -m "*[MyClass *]"
-```
-
-## File System Access
-
-### List App Files
-
-```bash
-ios-toolkit files list com.example.myapp
-```
-
-### Pull Files
-
-```bash
-ios-toolkit files pull com.example.myapp Documents/ ./output
-```
-
-### Push Files
-
-```bash
-ios-toolkit files push ./test.txt com.example.myapp Documents/
-```
-
-## Logging
-
-### Stream Logs
-
-```bash
-ios-toolkit log stream
-```
-
-### Filter by App
-
-```bash
-ios-toolkit log stream --predicate 'subsystem == "com.example.myapp"'
-```
-
-### Filter by Level
-
-```bash
-ios-toolkit log stream --level error
-```
-
-## Screenshots
-
-```bash
-ios-toolkit screenshot --output ./screen.png
-```
-
-## Keychain Access
-
-### Dump Keychain
-
-```bash
-ios-toolkit keychain dump
-```
-
-Note: Only works with simulator keychain, not actual device keychain.
 
 ## Example Workflows
 
 ### Basic App Testing
 
 ```bash
-# 1. Boot simulator
-ios-toolkit sim boot "iPhone 15 Pro"
+# 1. List simulators
+mobile-recon ios device list
 
-# 2. Install app
-ios-toolkit app install MyApp.app
+# 2. Boot simulator
+mobile-recon ios device boot <udid>
 
-# 3. Launch and monitor
-ios-toolkit app launch com.example.myapp
-ios-toolkit log stream --predicate 'subsystem == "com.example.myapp"'
+# 3. List running apps
+mobile-recon ios frida apps
 ```
 
 ### Dynamic Analysis with Frida
 
 ```bash
-# 1. Spawn app suspended
-ios-toolkit frida spawn com.example.myapp
+# 1. List processes
+mobile-recon ios frida ps
 
-# 2. Attach Frida script
-frida -U -n MyApp -l hook.js
+# 2. Attach to process
+mobile-recon ios frida attach <pid>
 
-# 3. Resume execution
-```
-
-### Extract App Data
-
-```bash
-# List app's sandbox
-ios-toolkit files list com.example.myapp
-
-# Pull databases
-ios-toolkit files pull com.example.myapp Library/Application\ Support/ ./data
-
-# Pull preferences
-ios-toolkit files pull com.example.myapp Library/Preferences/ ./prefs
+# 3. Or spawn app
+mobile-recon ios frida spawn com.example.myapp
 ```
 
 ## Limitations

@@ -13,49 +13,34 @@ Automate security testing workflows with mobile-recon.
 TARGET_PACKAGE=$1
 
 # Extract APK
-adb-toolkit app pull-apk $TARGET_PACKAGE
+mobile-recon adb app pull $TARGET_PACKAGE
 
 # Analyze
-apk-analyzer secrets ${TARGET_PACKAGE}.apk
-apk-analyzer security ${TARGET_PACKAGE}.apk
-apk-analyzer permissions ${TARGET_PACKAGE}.apk
+mobile-recon apk strings ${TARGET_PACKAGE}.apk
+mobile-recon apk security ${TARGET_PACKAGE}.apk
+mobile-recon apk permissions ${TARGET_PACKAGE}.apk
 ```
 
-### JSON Output
-
-Most commands support `--json` for machine-readable output:
+### Workflow Example
 
 ```bash
-adb-toolkit device list --json | jq '.devices[]'
-apk-analyzer info app.apk --json > report.json
-```
+#!/bin/bash
+# full-recon.sh
 
-## CI/CD Integration
+# 1. Network discovery
+mobile-recon nmap scan quick 192.168.1.0/24
 
-### GitHub Actions
+# 2. Find Android devices with ADB
+mobile-recon nmap mobile adb 192.168.1.0/24
 
-```yaml
-name: APK Security Scan
+# 3. List connected devices
+mobile-recon adb device list
 
-on:
-  push:
-    paths:
-      - '**.apk'
-
-jobs:
-  scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Install mobile-recon
-        run: |
-          go install github.com/MKS-01/mobile-recon/...@latest
-
-      - name: Security Scan
-        run: |
-          apk-analyzer audit app.apk --json > report.json
-          apk-analyzer audit app.apk --fail-on-secrets
+# 4. Extract and analyze target app
+mobile-recon adb app pull com.target.app
+mobile-recon apk info com.target.app.apk
+mobile-recon apk permissions com.target.app.apk
+mobile-recon apk security com.target.app.apk
 ```
 
 ## Batch Processing
@@ -65,17 +50,29 @@ jobs:
 ```bash
 for apk in *.apk; do
     echo "Scanning $apk..."
-    apk-analyzer secrets "$apk" >> results.txt
+    mobile-recon apk strings "$apk" >> results.txt
+    mobile-recon apk security "$apk" >> results.txt
 done
 ```
 
 ### Network Discovery
 
 ```bash
-# Discover and probe all Android devices
-nmap-toolkit mobile-scan android-adb 192.168.1.0/24 --json | \
-    jq -r '.devices[].ip' | \
-    xargs -I {} adb connect {}
+# Discover all Android devices on network
+mobile-recon nmap mobile adb 192.168.1.0/24
+```
+
+## Helpful Aliases
+
+Add to your shell config for quick access:
+
+```bash
+# Mobile Recon aliases
+alias mr='mobile-recon'
+alias mradb='mobile-recon adb'
+alias mrnmap='mobile-recon nmap'
+alias mrapk='mobile-recon apk'
+alias mrios='mobile-recon ios'
 ```
 
 ## Next Steps
