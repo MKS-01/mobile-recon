@@ -93,6 +93,7 @@ mobile-recon nmap vuln scan 192.168.1.1
 mobile-recon apk info app.apk
 mobile-recon apk manifest app.apk
 mobile-recon apk permissions app.apk
+mobile-recon apk abuse-permissions app.apk
 mobile-recon apk security app.apk
 mobile-recon apk strings app.apk
 
@@ -188,15 +189,17 @@ Android APK static analysis toolkit.
 ```bash
 mobile-recon apk --help
 
-mobile-recon apk info app.apk             # APK metadata
-mobile-recon apk manifest app.apk         # Parse AndroidManifest.xml
-mobile-recon apk permissions app.apk      # List permissions
-mobile-recon apk permissions -d app.apk   # Dangerous permissions only
-mobile-recon apk security app.apk         # Security analysis
-mobile-recon apk strings app.apk          # Extract strings
-mobile-recon apk strings --urls app.apk   # Extract URLs only
-mobile-recon apk files app.apk            # List files
-mobile-recon apk files --tree app.apk     # Show file tree
+mobile-recon apk info app.apk                 # APK metadata
+mobile-recon apk manifest app.apk             # Parse AndroidManifest.xml
+mobile-recon apk permissions app.apk          # List permissions
+mobile-recon apk permissions -d app.apk       # Dangerous permissions only
+mobile-recon apk abuse-permissions app.apk    # Detect abusive permissions
+mobile-recon apk abuse-permissions -m app.apk # Malware permissions only
+mobile-recon apk security app.apk             # Security analysis
+mobile-recon apk strings app.apk              # Extract strings
+mobile-recon apk strings --urls app.apk       # Extract URLs only
+mobile-recon apk files app.apk                # List files
+mobile-recon apk files --tree app.apk         # Show file tree
 ```
 
 ### iOS Toolkit
