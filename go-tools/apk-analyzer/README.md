@@ -7,6 +7,7 @@ A comprehensive toolkit for static analysis of Android APK files.
 - **APK Information** - Extract metadata, file size, architecture info
 - **Manifest Analysis** - Parse and extract AndroidManifest.xml
 - **Permission Analysis** - Identify dangerous permissions and their risks
+- **Abusive Permission Detection** - Detect permissions commonly abused by malware
 - **String Extraction** - Extract strings from DEX and native libraries
 - **Security Analysis** - Detect hardcoded secrets, misconfigurations, and security issues
 - **File Management** - List and extract files from APK archives
@@ -55,6 +56,22 @@ apk-analyzer permissions app.apk --dangerous
 
 # JSON output
 apk-analyzer permissions app.apk -o json
+```
+
+### Detect Abusive Permissions
+
+```bash
+# Scan for permissions commonly abused by malware
+apk-analyzer abuse-permissions app.apk
+
+# Show only malware-associated permissions (high priority)
+apk-analyzer abuse-permissions app.apk --malware
+
+# Verbose output with detailed descriptions
+apk-analyzer abuse-permissions app.apk -v
+
+# JSON output for integration
+apk-analyzer abuse-permissions app.apk -o json
 ```
 
 ### Extract Strings
@@ -148,6 +165,32 @@ The tool identifies Android dangerous permissions including:
 | CALL_PHONE | Financial |
 | READ_EXTERNAL_STORAGE | Privacy |
 
+## Abusive Permission Detection
+
+The `abuse-permissions` command detects two categories of potentially malicious permissions:
+
+### Malware Permissions
+Top permissions widely abused by known malware (25+ indicators):
+- INTERNET, WAKE_LOCK - Persistence and data exfiltration
+- CAMERA, RECORD_AUDIO - Surveillance capabilities
+- READ/WRITE_EXTERNAL_STORAGE - Data theft
+- READ_SMS, RECEIVE_SMS - OTP interception
+- SYSTEM_ALERT_WINDOW - Overlay attacks/clickjacking
+- RECEIVE_BOOT_COMPLETED - Persistence across reboots
+- REQUEST_INSTALL_PACKAGES - Dropper functionality
+
+### Other Common Abused Permissions
+Permissions commonly misused but also found in legitimate apps (20+ indicators):
+- FOREGROUND_SERVICE variants - Background execution
+- BIND_ACCESSIBILITY_SERVICE - Keylogging, credential theft
+- BIND_NOTIFICATION_LISTENER_SERVICE - Notification interception
+- QUERY_ALL_PACKAGES - App reconnaissance
+
+Each permission includes:
+- **Status**: normal, dangerous, or unknown
+- **Info**: Brief capability description
+- **Description**: Detailed explanation of abuse potential
+
 ## Output Formats
 
 All commands support two output formats:
@@ -179,6 +222,9 @@ apk-analyzer strings app.apk --min 8 -o json > strings.json
 
 ### Malware Analysis
 ```bash
+# Detect abusive permissions (primary malware indicator)
+apk-analyzer abuse-permissions app.apk -v
+
 # Find suspicious URLs
 apk-analyzer strings app.apk --urls
 
