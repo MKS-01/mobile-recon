@@ -8,51 +8,71 @@
 
 A unified CLI toolkit for mobile security testing — Android, iOS, and the networks they run on.
 
-> **Educational project.** Built for learning mobile security concepts, understanding tooling, and experimenting in lab environments. Still in active development and requires thorough testing before use in any real scenario.
-
+> **Educational project** built for learning mobile security concepts and experimenting in lab environments. Still in active development — use in controlled environments only.
 > Built with [Claude](https://claude.ai) as an AI-assisted development experiment.
 
-## Preview
+---
 
-![mobile-recon CLI](screenshot/cli-preview.png)
+<img src="screenshot/cli-preview.png" width="580">
 
-![Frida Setup via ADB](screenshot/cli-preview2.png)
+*Unified CLI — all tools in one place*
+
+<img src="screenshot/cli-frida.png" width="400">
+
+*One-command Frida server setup on Android*
+
+---
 
 ## Tools
 
 ### ADB Toolkit
-Android device automation and reverse engineering over ADB. Manage devices, pull APKs, monitor logs, and automate input. Includes **one-command Frida server setup** — automatically detects architecture, downloads the right Frida version, pushes it to the device, and starts it.
+Android device automation over ADB. Manage devices, extract APKs, monitor logs, and automate input. The standout feature is **one-command Frida server setup** — detects device architecture, downloads the correct Frida version, pushes it, and starts the server automatically.
 
 ```bash
-mobile-recon adb frida setup   # auto-installs & starts Frida server on device
-mobile-recon adb frida ps      # list running processes
+mobile-recon adb device list              # list connected devices
+mobile-recon adb app pull <package>       # extract APK from device
+mobile-recon adb recon logcat             # stream device logs
+mobile-recon adb frida setup              # auto-install & start Frida server
+mobile-recon adb frida ps                 # list running processes
 ```
 
 ### Nmap Toolkit
-Local network discovery focused on mobile environments. Find devices on your network, detect services, test SSL/TLS, and locate Android/iOS devices by scanning for ADB and lockdown ports.
+Local network discovery focused on mobile environments. Quickly find all devices on a network, detect open services, test SSL/TLS, and specifically locate Android ADB devices or identify MITM proxies like Burp and Charles.
 
 ```bash
-mobile-recon nmap mobile adb <network>   # find Android devices with ADB open
-mobile-recon nmap mobile mitm <network>  # detect Burp/Charles/mitmproxy proxies
+mobile-recon nmap scan quick <network/24>     # discover live hosts
+mobile-recon nmap detect service <target>     # identify running services
+mobile-recon nmap mobile adb <network/24>     # find Android devices with ADB open
+mobile-recon nmap mobile mitm <network/24>    # detect Burp/Charles/mitmproxy
+mobile-recon nmap ssl scan <target>           # test SSL/TLS configuration
 ```
 
 ### APK Analyzer
-Static analysis for Android APKs without needing to install them. Extracts metadata, parses the manifest, flags dangerous permissions, and pulls URLs and secrets from strings.
+Static analysis for Android APKs — no installation required. Parse the manifest, audit permissions, run security checks, and extract strings or URLs directly from the binary.
 
 ```bash
-mobile-recon apk security app.apk        # security checks in one command
-mobile-recon apk strings --urls app.apk  # extract all URLs from the APK
+mobile-recon apk info app.apk                 # metadata and basic info
+mobile-recon apk permissions app.apk          # list all permissions
+mobile-recon apk security app.apk             # security audit in one command
+mobile-recon apk strings --urls app.apk       # extract URLs from the APK
 ```
 
 ### iOS Toolkit
-iOS Simulator management with Frida integration. Boot simulators, list running apps, attach to processes, or spawn apps with Frida — all from the CLI without opening Xcode.
+iOS Simulator management with Frida integration — boot simulators, list running processes, attach to apps, or spawn and instrument them, all without opening Xcode.
 
 ```bash
-mobile-recon ios frida setup             # install Frida on simulator
-mobile-recon ios frida spawn <bundle-id> # spawn and instrument an app
+mobile-recon ios device list                  # list available simulators
+mobile-recon ios device boot <udid>           # boot a simulator
+mobile-recon ios frida setup                  # install Frida
+mobile-recon ios frida attach <pid>           # attach to a running process
+mobile-recon ios frida spawn <bundle-id>      # spawn and instrument an app
 ```
 
-## Requirements
+---
+
+## Getting Started
+
+### Requirements
 
 | Dependency | Required For | Install |
 |------------|-------------|---------|
@@ -61,7 +81,7 @@ mobile-recon ios frida spawn <bundle-id> # spawn and instrument an app
 | Nmap | Nmap Toolkit | `brew install nmap` |
 | Xcode | iOS Toolkit | Mac App Store |
 
-## Installation
+### Install
 
 ```bash
 git clone https://github.com/MKS-01/mobile-recon.git
@@ -69,88 +89,31 @@ cd mobile-recon
 ./scripts/install.sh
 ```
 
-The install script builds the binary and installs it to `~/go/bin`. If `mobile-recon` is not found after install, ensure Go's bin is in your PATH:
+The install script builds the binary and places it in `~/go/bin`. If `mobile-recon` is not found, add Go's bin to your PATH:
 
 ```bash
 export PATH="$HOME/go/bin:$PATH"  # add to ~/.zshrc or ~/.bashrc
 ```
 
-## Usage
-
-```
-mobile-recon <tool> <command> [flags]
-```
-
-### ADB Toolkit
-
-```bash
-mobile-recon adb device list
-mobile-recon adb device info
-mobile-recon adb app list
-mobile-recon adb app pull <package>
-mobile-recon adb recon logcat
-mobile-recon adb frida setup
-mobile-recon adb frida ps
-```
-
-### Nmap Toolkit
-
-```bash
-mobile-recon nmap scan quick <network/24>
-mobile-recon nmap scan port <target>
-mobile-recon nmap detect service <target>
-mobile-recon nmap ssl scan <target>
-mobile-recon nmap mobile adb <network/24>
-mobile-recon nmap mobile ios <network/24>
-mobile-recon nmap mobile mitm <network/24>
-```
-
-### APK Analyzer
-
-```bash
-mobile-recon apk info app.apk
-mobile-recon apk manifest app.apk
-mobile-recon apk permissions app.apk
-mobile-recon apk security app.apk
-mobile-recon apk strings --urls app.apk
-```
-
-### iOS Toolkit
-
-```bash
-mobile-recon ios device list
-mobile-recon ios device boot <udid>
-mobile-recon ios frida ps
-mobile-recon ios frida attach <pid>
-mobile-recon ios frida spawn <bundle-id>
-```
+---
 
 ## Contributing
 
 1. Fork and create a branch: `git checkout -b feature/your-feature`
-2. Make changes and verify: `go build ./...`
-3. Rebuild: `cd go-tools/mobile-recon-cli && go build -o mobile-recon && mv mobile-recon ~/go/bin/`
-4. Open a Pull Request
+2. Make changes and verify the build: `go build ./...`
+3. Rebuild and install: `./scripts/install.sh`
+4. Open a Pull Request with a clear description
 
-For adding a new toolkit, follow the existing tool structure in `go-tools/`.
+Follow the existing tool structure in `go-tools/` when adding new toolkits.
+
+---
 
 ## Disclaimer
 
-This project is **educational and experimental** — built to learn how mobile security tooling works. It is still in progress and has not been fully tested. Use it in controlled lab environments only.
-
-- Not production-ready
-- Always obtain proper authorization before scanning networks or testing applications you don't own
+This project is **educational and experimental**. It has not been fully tested and is not production-ready. Always obtain proper authorization before scanning networks or testing apps you don't own.
 
 **Use responsibly. The author is not liable for any misuse.**
 
 ## License
 
 MIT — see [LICENSE](LICENSE).
-
-## Built With
-
-- [Claude](https://claude.ai) — AI pair programmer
-- [Cobra](https://github.com/spf13/cobra) — CLI framework
-- [Nmap](https://nmap.org) — Network mapper
-- [ADB](https://developer.android.com/studio/command-line/adb) — Android Debug Bridge
-- [color](https://github.com/fatih/color) — Terminal colors
