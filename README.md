@@ -14,7 +14,7 @@ A unified CLI toolkit for mobile security testing — Android, iOS, and the netw
 
 ## Preview
 
-![mobile-recon CLI](screenshot/Screenshot%202026-02-26%20at%208.29.31%20PM.png)
+![mobile-recon CLI](screenshot/cli-preview.png)
 
 ## Tools
 
