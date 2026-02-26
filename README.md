@@ -13,11 +13,11 @@ A unified CLI toolkit for mobile security testing — Android, iOS, and the netw
 
 ---
 
-<img src="screenshot/cli-preview.png" width="580">
+<img src="screenshot/cli-preview.png" width="500">
 
 *Unified CLI — all tools in one place*
 
-<img src="screenshot/cli-frida.png" width="400">
+<img src="screenshot/cli-frida.png" width="500">
 
 *One-command Frida server setup on Android*
 
