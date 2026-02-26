@@ -17,8 +17,8 @@ var (
 	RootCmd = &cobra.Command{
 		Use:   "nmap",
 		Short: "Network reconnaissance toolkit",
-		Long: `A comprehensive toolkit for network reconnaissance using Nmap.
-Perfect for mobile security testing, penetration testing, and network analysis.`,
+		Long: `A lightweight toolkit for local network discovery and mobile device reconnaissance.
+Focused on host discovery, service detection, and mobile security testing.`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if !nmap.IsNmapInstalled() {
 				output.Error("Nmap is not installed or not in PATH")

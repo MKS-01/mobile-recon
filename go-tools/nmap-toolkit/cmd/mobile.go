@@ -13,9 +13,9 @@ var mobileCmd = &cobra.Command{
 	Short: "Mobile device reconnaissance and security testing",
 	Long: `Specialized commands for mobile device reconnaissance including:
   - Android ADB device discovery
-  - iOS service detection
-  - Mobile app service ports
-  - Network-based mobile device identification`,
+  - iOS device detection
+  - MITM proxy detection
+  - Network-based mobile device scanning`,
 }
 
 var androidADBCmd = &cobra.Command{
@@ -134,37 +134,6 @@ var mitmProxyCmd = &cobra.Command{
 	},
 }
 
-var appPortsCmd = &cobra.Command{
-	Use:   "app-ports [target]",
-	Short: "Scan common mobile application backend ports",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		target := args[0]
-		output.Header("Mobile App Backend Ports")
-		output.Info("Target: %s", target)
-
-		nmapArgs := []string{
-			"-p", "80,443,3000,3306,5432,5672,6379,8080,8443,9000,9092,27017",
-			"--open",
-			"-sV",
-			"-v",
-			target,
-		}
-
-		result, err := nmap.CustomScan(nmapArgs, stream)
-		if err != nil {
-			output.Error("Scan failed: %v", err)
-			return
-		}
-
-		output.Success("Scan completed")
-		if !stream {
-			fmt.Println()
-			output.Data(result.Output)
-		}
-	},
-}
-
 func init() {
 	RootCmd.AddCommand(mobileCmd)
 
@@ -172,11 +141,9 @@ func init() {
 	mobileCmd.AddCommand(mobileScanCmd)
 	mobileCmd.AddCommand(iosCmd)
 	mobileCmd.AddCommand(mitmProxyCmd)
-	mobileCmd.AddCommand(appPortsCmd)
 
 	androidADBCmd.Flags().BoolVar(&stream, "stream", false, "Stream output in real-time")
 	mobileScanCmd.Flags().BoolVar(&stream, "stream", false, "Stream output in real-time")
 	iosCmd.Flags().BoolVar(&stream, "stream", false, "Stream output in real-time")
 	mitmProxyCmd.Flags().BoolVar(&stream, "stream", false, "Stream output in real-time")
-	appPortsCmd.Flags().BoolVar(&stream, "stream", false, "Stream output in real-time")
 }

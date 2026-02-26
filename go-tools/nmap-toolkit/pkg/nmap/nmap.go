@@ -137,33 +137,6 @@ func ServiceVersionScan(target string, ports string, aggressive bool, stream boo
 	return runNmapCommand(args, stream)
 }
 
-func OSDetection(target string, stream bool) (*ScanResult, error) {
-	args := []string{"-O", "-v", target}
-	return runNmapCommand(args, stream)
-}
-
-func AggressiveScan(target string, ports string, stream bool) (*ScanResult, error) {
-	args := []string{"-A", "-T4", "-v"}
-
-	if ports != "" {
-		args = append(args, "-p", ports)
-	}
-
-	args = append(args, target)
-	return runNmapCommand(args, stream)
-}
-
-func VulnerabilityScan(target string, ports string, stream bool) (*ScanResult, error) {
-	args := []string{"--script", "vuln", "-sV", "-v"}
-
-	if ports != "" {
-		args = append(args, "-p", ports)
-	}
-
-	args = append(args, target)
-	return runNmapCommand(args, stream)
-}
-
 func SSLScan(target string, port string, stream bool) (*ScanResult, error) {
 	if port == "" {
 		port = "443"
@@ -208,42 +181,5 @@ func CustomScan(nmapArgs []string, stream bool) (*ScanResult, error) {
 
 func ScanNetwork(network string, stream bool) (*ScanResult, error) {
 	args := []string{"-sn", "--min-rate", "1000", network}
-	return runNmapCommand(args, stream)
-}
-
-func StealthScan(target string, ports string, stream bool) (*ScanResult, error) {
-	args := []string{"-sS"}
-
-	if ports != "" {
-		args = append(args, "-p", ports)
-	} else {
-		args = append(args, "--top-ports", "1000")
-	}
-
-	args = append(args, "-v", target)
-	return runNmapCommand(args, stream)
-}
-
-func UDPScan(target string, ports string, stream bool) (*ScanResult, error) {
-	args := []string{"-sU"}
-
-	if ports != "" {
-		args = append(args, "-p", ports)
-	} else {
-		args = append(args, "--top-ports", "100")
-	}
-
-	args = append(args, "-v", target)
-	return runNmapCommand(args, stream)
-}
-
-func ScriptScan(target string, scripts string, ports string, stream bool) (*ScanResult, error) {
-	args := []string{"--script", scripts}
-
-	if ports != "" {
-		args = append(args, "-p", ports)
-	}
-
-	args = append(args, "-v", target)
 	return runNmapCommand(args, stream)
 }
