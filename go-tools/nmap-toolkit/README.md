@@ -1,149 +1,95 @@
 # Nmap Toolkit
 
-A comprehensive Go-based CLI wrapper for Nmap that provides powerful network reconnaissance capabilities with a focus on mobile security testing and penetration testing.
+A lightweight Go CLI wrapper for Nmap focused on local network discovery and mobile device reconnaissance.
 
 ## Features
 
-### Network Scanning
-- **Quick Host Discovery**: Fast ping scans to identify live hosts
-- **Port Scanning**: TCP, UDP, and SYN stealth scans
-- **Network-wide Scanning**: Discover all devices on a network segment
-
-### Detection & Fingerprinting
-- **Service Version Detection**: Identify services and their versions
-- **OS Fingerprinting**: Detect operating systems
-- **Aggressive Scanning**: Comprehensive detection with scripts and traceroute
-
-### Vulnerability Assessment
-- **Vulnerability Scanning**: Automated vulnerability detection using NSE scripts
-- **SSL/TLS Testing**: Comprehensive SSL/TLS cipher and certificate analysis
-- **Custom NSE Scripts**: Run any Nmap Scripting Engine (NSE) scripts
-
-### Mobile-Specific Reconnaissance
-- **Android ADB Discovery**: Find devices with ADB debugging enabled
-- **iOS Device Detection**: Locate iOS devices on the network
-- **Mobile Service Scanning**: Scan common mobile app backend ports
-- **MITM Proxy Detection**: Identify testing proxies (Burp, Charles, mitmproxy)
+- **Network Discovery**: Quickly find all devices on your local network
+- **Port Scanning**: TCP port scanning with configurable options
+- **Service Detection**: Identify services running on discovered hosts
+- **SSL/TLS Testing**: Analyze SSL/TLS configuration of services
+- **Mobile Device Discovery**: Find Android (ADB) and iOS devices on the network
+- **MITM Proxy Detection**: Locate testing proxies (Burp, Charles, mitmproxy)
 
 ## Installation
 
 ### Prerequisites
 
-1. **Install Nmap**:
-   ```bash
-   # macOS
-   brew install nmap
-
-   # Linux (Debian/Ubuntu)
-   sudo apt install nmap
-
-   # Linux (RHEL/CentOS)
-   sudo yum install nmap
-
-   # Windows
-   # Download from https://nmap.org/download.html
-   ```
-
-2. **Install Go** (1.21 or higher):
-   ```bash
-   # Visit https://golang.org/dl/
-   ```
-
-### Build from Source
+**Nmap** must be installed:
 
 ```bash
-cd go-tools/nmap-toolkit
-go mod download
-go build -o nmap-toolkit
+# macOS
+brew install nmap
+
+# Linux (Debian/Ubuntu)
+sudo apt install nmap
+
+# Linux (RHEL/CentOS)
+sudo yum install nmap
 ```
 
-### Install Globally
+### Build
 
 ```bash
 cd go-tools/nmap-toolkit
-go install
+go build -o nmap-toolkit
 ```
 
 ## Usage
 
-### Basic Commands
-
-```bash
-# Show help
-nmap-toolkit --help
-
-# Quick host discovery
-nmap-toolkit scan quick 192.168.1.0/24
-
-# Basic port scan
-nmap-toolkit scan port 192.168.1.1
-
-# Scan specific ports
-nmap-toolkit scan port 192.168.1.1 -p 80,443,8080
-
-# Fast scan (top 100 ports)
-nmap-toolkit scan port 192.168.1.1 --fast
-
-# Aggressive timing with real-time output
-nmap-toolkit scan port 192.168.1.1 --aggressive --stream
-```
-
 ### Network Discovery
 
 ```bash
-# Scan entire network for live hosts
-nmap-toolkit scan network 192.168.1.0/24
+# Quick ping scan to find live hosts
+nmap-toolkit scan quick 192.168.1.0/24
 
-# SYN stealth scan (requires root)
-sudo nmap-toolkit scan stealth 192.168.1.1
-
-# UDP port scan (requires root)
-sudo nmap-toolkit scan udp 192.168.1.1 -p 53,67,161
+# Discover all devices on network
+nmap-toolkit scan network 192.168.1.0/24 --stream
 ```
 
-### Service & OS Detection
+### Port Scanning
+
+```bash
+# Basic port scan
+nmap-toolkit scan port 192.168.1.100
+
+# Scan specific ports
+nmap-toolkit scan port 192.168.1.100 -p 80,443,8080
+
+# Fast scan (top 100 ports)
+nmap-toolkit scan port 192.168.1.100 --fast
+
+# Aggressive timing with real-time output
+nmap-toolkit scan port 192.168.1.100 --aggressive --stream
+```
+
+### Service Detection
 
 ```bash
 # Detect services and versions
-nmap-toolkit detect service 192.168.1.1
+nmap-toolkit detect service 192.168.1.100
 
 # Aggressive service detection
-nmap-toolkit detect service 192.168.1.1 --aggressive
-
-# OS detection (requires root)
-sudo nmap-toolkit detect os 192.168.1.1
-
-# Full aggressive scan (OS, service, scripts, traceroute)
-sudo nmap-toolkit detect aggressive 192.168.1.1
+nmap-toolkit detect service 192.168.1.100 --aggressive --stream
 ```
 
-### Vulnerability Scanning
+### SSL/TLS Testing
 
 ```bash
-# Scan for vulnerabilities
-nmap-toolkit vuln scan 192.168.1.1
+# Test SSL/TLS on default port 443
+nmap-toolkit ssl scan example.com
 
-# Scan specific ports for vulnerabilities
-nmap-toolkit vuln scan 192.168.1.1 -p 80,443,8080
-
-# SSL/TLS enumeration
-nmap-toolkit vuln ssl example.com
-
-# Custom SSL port
-nmap-toolkit vuln ssl 192.168.1.1 --ports 8443
-
-# Run custom NSE scripts
-nmap-toolkit vuln script 192.168.1.1 --scripts "http-enum,http-title"
-nmap-toolkit vuln script 192.168.1.1 --scripts "smb-*"
+# Test SSL/TLS on custom port
+nmap-toolkit ssl scan 192.168.1.100 -p 8443
 ```
 
-### Mobile Security Testing
+### Mobile Device Discovery
 
 ```bash
-# Discover Android ADB devices on network
+# Find Android devices with ADB enabled
 nmap-toolkit mobile adb 192.168.1.0/24
 
-# Scan for iOS devices
+# Find iOS devices
 nmap-toolkit mobile ios 192.168.1.0/24
 
 # Mobile-optimized service scan
@@ -151,50 +97,23 @@ nmap-toolkit mobile scan 192.168.1.100
 
 # Detect MITM proxies (Burp, Charles, mitmproxy)
 nmap-toolkit mobile mitm 192.168.1.0/24
-
-# Scan mobile app backend ports
-nmap-toolkit mobile app-ports api.example.com
 ```
 
 ## Command Reference
 
-### Scan Commands
+| Command | Description |
+|---------|-------------|
+| `scan quick [target]` | Quick ping scan for host discovery |
+| `scan port [target]` | TCP port scan |
+| `scan network [network]` | Network-wide host discovery |
+| `detect service [target]` | Service version detection |
+| `ssl scan [target]` | SSL/TLS enumeration |
+| `mobile adb [network]` | Find Android ADB devices |
+| `mobile ios [network]` | Find iOS devices |
+| `mobile scan [target]` | Mobile service scan |
+| `mobile mitm [network]` | Detect MITM proxies |
 
-| Command | Description | Requires Root |
-|---------|-------------|---------------|
-| `scan quick [target]` | Quick ping scan for host discovery | No |
-| `scan port [target]` | TCP port scan | No |
-| `scan stealth [target]` | SYN stealth scan | Yes |
-| `scan udp [target]` | UDP port scan | Yes |
-| `scan network [network]` | Network-wide host discovery | No |
-
-### Detection Commands
-
-| Command | Description | Requires Root |
-|---------|-------------|---------------|
-| `detect service [target]` | Service version detection | No |
-| `detect os [target]` | Operating system fingerprinting | Yes |
-| `detect aggressive [target]` | Full aggressive scan | Partial |
-
-### Vulnerability Commands
-
-| Command | Description | Requires Root |
-|---------|-------------|---------------|
-| `vuln scan [target]` | Vulnerability scanning with NSE | No |
-| `vuln ssl [target]` | SSL/TLS enumeration | No |
-| `vuln script [target]` | Run custom NSE scripts | No |
-
-### Mobile Commands
-
-| Command | Description | Requires Root |
-|---------|-------------|---------------|
-| `mobile adb [network]` | Find Android ADB devices | No |
-| `mobile ios [network]` | Find iOS devices | No |
-| `mobile scan [target]` | Mobile service scan | No |
-| `mobile mitm [network]` | Detect MITM proxies | No |
-| `mobile app-ports [target]` | Scan mobile backend ports | No |
-
-## Common Flags
+## Flags
 
 | Flag | Short | Description |
 |------|-------|-------------|
@@ -203,160 +122,35 @@ nmap-toolkit mobile app-ports api.example.com
 | `--stream` | | Stream output in real-time |
 | `--fast` | | Fast scan mode (top 100 ports) |
 | `--aggressive` | | Aggressive timing/detection |
-| `--scripts` | | Specify NSE scripts to run |
 
-## Examples
-
-### Comprehensive Mobile App Security Test
+## Example Workflow
 
 ```bash
 # 1. Discover all devices on network
 nmap-toolkit scan network 192.168.1.0/24 --stream
 
-# 2. Find Android ADB devices
+# 2. Find mobile devices
 nmap-toolkit mobile adb 192.168.1.0/24
+nmap-toolkit mobile ios 192.168.1.0/24
 
-# 3. Comprehensive service scan on target
-nmap-toolkit detect service 192.168.1.100 --aggressive --stream
+# 3. Scan a specific device
+nmap-toolkit detect service 192.168.1.100 --stream
 
-# 4. Check for vulnerabilities
-nmap-toolkit vuln scan 192.168.1.100 --stream
-
-# 5. Test SSL/TLS configuration
-nmap-toolkit vuln ssl 192.168.1.100 --ports 443
-
-# 6. Scan mobile app backend
-nmap-toolkit mobile app-ports api.example.com --stream
+# 4. Test SSL/TLS if applicable
+nmap-toolkit ssl scan 192.168.1.100 -p 443
 ```
 
-### Penetration Testing Workflow
+## Tips
 
-```bash
-# 1. Initial reconnaissance
-nmap-toolkit scan quick 10.0.0.0/24
-
-# 2. Deep port scan on discovered hosts
-sudo nmap-toolkit scan stealth 10.0.0.50 --stream
-
-# 3. Service and OS detection
-sudo nmap-toolkit detect aggressive 10.0.0.50 --stream
-
-# 4. Vulnerability assessment
-nmap-toolkit vuln scan 10.0.0.50 -p 80,443,8080,8443 --stream
-
-# 5. Web application enumeration
-nmap-toolkit vuln script 10.0.0.50 --scripts "http-*" -p 80,443
-```
-
-### Network Security Audit
-
-```bash
-# Find all live hosts
-nmap-toolkit scan network 10.0.0.0/8 --stream
-
-# Identify exposed services
-nmap-toolkit detect service 10.0.0.0/8 --stream
-
-# Check for SSL/TLS issues
-nmap-toolkit vuln ssl 10.0.0.50
-
-# Look for common vulnerabilities
-nmap-toolkit vuln scan 10.0.0.0/8 --stream
-```
-
-## Tips & Best Practices
-
-### Performance
-
-- Use `--stream` flag for real-time output on long scans
-- Use `--fast` for quick reconnaissance (scans top 100 ports)
-- Use `--aggressive` for faster timing (may be less accurate)
-- Limit scan scope with specific port ranges when possible
-
-### Stealth
-
-- Use `scan stealth` for SYN scans that are harder to detect
-- Avoid aggressive scans on production systems
-- Be aware that vulnerability scans may trigger IDS/IPS systems
-
-### Mobile Testing
-
-- Ensure devices are on the same network segment for discovery
+- Use `--stream` for real-time output on longer scans
+- Use `--fast` for quick reconnaissance
+- Ensure mobile devices are on the same network segment
 - Android ADB discovery only works if TCP/IP debugging is enabled
 - iOS discovery uses the lockdown service (port 62078)
-- MITM proxy detection helps identify test infrastructure
 
-### Authorization
+## Authorization
 
-- Always obtain proper authorization before scanning networks
-- Many scan types require root/administrator privileges
-- Respect rate limits and avoid DoS conditions
-- Document all scan activities for compliance
-
-## Common NSE Script Categories
-
-```bash
-# Run all default scripts
-nmap-toolkit vuln script [target] --scripts "default"
-
-# Safe scripts only
-nmap-toolkit vuln script [target] --scripts "safe"
-
-# Vulnerability detection
-nmap-toolkit vuln script [target] --scripts "vuln"
-
-# Authentication testing
-nmap-toolkit vuln script [target] --scripts "auth"
-
-# Brute force attacks (use with caution)
-nmap-toolkit vuln script [target] --scripts "brute"
-
-# Discovery scripts
-nmap-toolkit vuln script [target] --scripts "discovery"
-```
-
-## Troubleshooting
-
-### "Nmap is not installed or not in PATH"
-
-Install nmap using your package manager or download from https://nmap.org
-
-### "Scan failed" with permission errors
-
-Some scan types require root/administrator privileges:
-```bash
-sudo nmap-toolkit scan stealth [target]
-sudo nmap-toolkit detect os [target]
-sudo nmap-toolkit scan udp [target]
-```
-
-### Slow scans
-
-- Use `--fast` flag for quicker results
-- Specify exact ports with `-p` instead of scanning all ports
-- Use `--aggressive` for faster timing
-- Reduce the network range
-
-### No devices found in mobile scans
-
-- Ensure devices are on the same network
-- For Android: Enable ADB over TCP/IP on the device
-- For iOS: Ensure the device is not in airplane mode
-- Check firewall rules aren't blocking scan traffic
-
-## Security Considerations
-
-This tool is designed for:
-- Authorized penetration testing
-- Network security auditing
-- Mobile application security testing
-- Research and educational purposes
-
-**Always obtain proper authorization before scanning any networks or systems you don't own.**
-
-## Contributing
-
-This is part of the [mobile-recon](https://github.com/MKS-01/mobile-recon) project.
+Always obtain proper authorization before scanning networks or systems you don't own.
 
 ## License
 
@@ -364,4 +158,4 @@ MIT
 
 ## Credits
 
-Built on top of [Nmap](https://nmap.org) - the industry standard network mapper.
+Built on [Nmap](https://nmap.org) - the network mapper.

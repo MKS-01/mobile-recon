@@ -18,7 +18,7 @@ var (
 var scanCmd = &cobra.Command{
 	Use:   "scan",
 	Short: "Perform various types of network scans",
-	Long:  `Execute different types of network scans including quick scans, port scans, and stealth scans.`,
+	Long:  `Execute different types of network scans including quick host discovery, port scans, and network-wide scans.`,
 }
 
 var quickScanCmd = &cobra.Command{
@@ -75,56 +75,6 @@ var portScanCmd = &cobra.Command{
 	},
 }
 
-var stealthScanCmd = &cobra.Command{
-	Use:   "stealth [target]",
-	Short: "SYN stealth scan (requires root/admin)",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		target := args[0]
-		output.Header("SYN Stealth Scan")
-		output.Info("Target: %s", target)
-		output.Warning("This scan requires root/administrator privileges")
-
-		result, err := nmap.StealthScan(target, ports, stream)
-		if err != nil {
-			output.Error("Scan failed: %v", err)
-			output.Info("Try running with sudo/administrator privileges")
-			return
-		}
-
-		output.Success("Scan completed")
-		if !stream {
-			fmt.Println()
-			output.Data(result.Output)
-		}
-	},
-}
-
-var udpScanCmd = &cobra.Command{
-	Use:   "udp [target]",
-	Short: "UDP port scan (requires root/admin)",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		target := args[0]
-		output.Header("UDP Port Scan")
-		output.Info("Target: %s", target)
-		output.Warning("This scan requires root/administrator privileges and may take longer")
-
-		result, err := nmap.UDPScan(target, ports, stream)
-		if err != nil {
-			output.Error("Scan failed: %v", err)
-			output.Info("Try running with sudo/administrator privileges")
-			return
-		}
-
-		output.Success("Scan completed")
-		if !stream {
-			fmt.Println()
-			output.Data(result.Output)
-		}
-	},
-}
-
 var networkScanCmd = &cobra.Command{
 	Use:   "network [network]",
 	Short: "Scan entire network for live hosts",
@@ -153,20 +103,12 @@ func init() {
 
 	scanCmd.AddCommand(quickScanCmd)
 	scanCmd.AddCommand(portScanCmd)
-	scanCmd.AddCommand(stealthScanCmd)
-	scanCmd.AddCommand(udpScanCmd)
 	scanCmd.AddCommand(networkScanCmd)
 
 	portScanCmd.Flags().StringVarP(&ports, "ports", "p", "", "Ports to scan (e.g., 80,443 or 1-1000)")
 	portScanCmd.Flags().BoolVar(&fast, "fast", false, "Fast scan (top 100 ports)")
 	portScanCmd.Flags().BoolVar(&aggressive, "aggressive", false, "Aggressive timing (-T4)")
 	portScanCmd.Flags().BoolVar(&stream, "stream", false, "Stream output in real-time")
-
-	stealthScanCmd.Flags().StringVarP(&ports, "ports", "p", "", "Ports to scan (default: top 1000)")
-	stealthScanCmd.Flags().BoolVar(&stream, "stream", false, "Stream output in real-time")
-
-	udpScanCmd.Flags().StringVarP(&ports, "ports", "p", "", "Ports to scan (default: top 100)")
-	udpScanCmd.Flags().BoolVar(&stream, "stream", false, "Stream output in real-time")
 
 	networkScanCmd.Flags().BoolVar(&stream, "stream", false, "Stream output in real-time")
 }
