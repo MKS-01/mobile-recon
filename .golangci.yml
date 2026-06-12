@@ -1,0 +1,9 @@
+version: "2"
+
+# Multi-module repo: run per module, e.g. (cd go-tools/adb-toolkit && golangci-lint run)
+
+linters:
+  default: standard
+  enable:
+    - misspell
+    - unconvert

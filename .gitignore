@@ -89,3 +89,7 @@ htmlcov/
 local/
 scratch/
 temp/
+
+# Claude Code personal files
+CLAUDE.local.md
+.claude/settings.local.json
