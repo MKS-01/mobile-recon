@@ -56,6 +56,19 @@ func Data(format string, args ...interface{}) {
 	fmt.Printf(format+"\n", args...)
 }
 
+// KeyValue prints a key-value pair with the key emphasized.
+func KeyValue(key, value string) {
+	boldColor.Printf("%s: ", key)
+	fmt.Println(value)
+}
+
+// List prints a bulleted list of items.
+func List(items []string) {
+	for _, item := range items {
+		fmt.Printf("  • %s\n", item)
+	}
+}
+
 // Divider prints a visual separator line.
 func Divider() {
 	fmt.Println(color.HiBlackString("────────────────────────────────────────────────────────────────"))
@@ -69,4 +82,24 @@ func NewTable() *tabwriter.Writer {
 // InfoColor returns the info color for direct use.
 func InfoColor() *color.Color {
 	return infoColor
+}
+
+// SuccessColor returns the success color for direct use.
+func SuccessColor() *color.Color {
+	return successColor
+}
+
+// ErrorColor returns the error color for direct use.
+func ErrorColor() *color.Color {
+	return errorColor
+}
+
+// WarningColor returns the warning color for direct use.
+func WarningColor() *color.Color {
+	return warningColor
+}
+
+// BoldColor returns the bold color for direct use.
+func BoldColor() *color.Color {
+	return boldColor
 }

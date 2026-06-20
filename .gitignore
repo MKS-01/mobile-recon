@@ -20,6 +20,8 @@ go-tools/**/*.dylib
 # Go workspace files
 go.work
 go.work.sum
+# ...but this monorepo commits its workspace file (single app, pinned modules)
+!go-tools/go.work
 
 # Build artifacts
 dist/

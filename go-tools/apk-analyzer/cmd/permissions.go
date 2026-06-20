@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/apk"
-	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/utils"
+	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/spf13/cobra"
 )
 
@@ -43,13 +43,13 @@ func runPermissions(cmd *cobra.Command, args []string) {
 	apkPath := args[0]
 
 	if err := validateAPKPath(apkPath); err != nil {
-		utils.PrintError("%v", err)
+		output.Error("%v", err)
 		os.Exit(1)
 	}
 
 	info, err := apk.ParseManifestBasic(apkPath)
 	if err != nil {
-		utils.PrintError("Failed to parse manifest: %v", err)
+		output.Error("Failed to parse manifest: %v", err)
 		os.Exit(1)
 	}
 
@@ -71,26 +71,26 @@ func runPermissions(cmd *cobra.Command, args []string) {
 	}
 
 	// Text output
-	utils.PrintSection("Permission Analysis")
+	output.Section("Permission Analysis")
 
 	if len(info.Permissions) == 0 {
-		utils.PrintInfo("No permissions detected from binary manifest.")
-		utils.PrintInfo("Use 'apktool d %s' for complete permission list.", apkPath)
+		output.Info("No permissions detected from binary manifest.")
+		output.Info("Use 'apktool d %s' for complete permission list.", apkPath)
 		return
 	}
 
-	utils.PrintKeyValue("Total Permissions", fmt.Sprintf("%d", len(info.Permissions)))
+	output.KeyValue("Total Permissions", fmt.Sprintf("%d", len(info.Permissions)))
 
 	// Dangerous permissions
 	if len(dangerous) > 0 {
 		fmt.Println()
-		utils.Warning.Printf("Dangerous Permissions: %d\n", len(dangerous))
+		output.WarningColor().Printf("Dangerous Permissions: %d\n", len(dangerous))
 		fmt.Println()
 
 		for _, perm := range dangerous {
 			permInfo := apk.DangerousPermissions[perm]
 			shortName := strings.TrimPrefix(perm, "android.permission.")
-			utils.Error.Printf("  • %s\n", shortName)
+			output.ErrorColor().Printf("  • %s\n", shortName)
 			if verbose {
 				fmt.Printf("      Description: %s\n", permInfo.Description)
 				fmt.Printf("      Risk: %s\n", permInfo.Risk)
@@ -101,7 +101,7 @@ func runPermissions(cmd *cobra.Command, args []string) {
 	// Normal permissions
 	if !dangerousOnly && len(normal) > 0 {
 		fmt.Println()
-		utils.Info.Printf("Other Permissions: %d\n", len(normal))
+		output.InfoColor().Printf("Other Permissions: %d\n", len(normal))
 		fmt.Println()
 
 		for _, perm := range normal {
@@ -113,14 +113,14 @@ func runPermissions(cmd *cobra.Command, args []string) {
 	// Summary
 	fmt.Println()
 	if len(dangerous) > 0 {
-		utils.PrintWarning("App requests %d dangerous permission(s)", len(dangerous))
+		output.Warning("App requests %d dangerous permission(s)", len(dangerous))
 	} else {
-		utils.PrintSuccess("No dangerous permissions detected")
+		output.Success("No dangerous permissions detected")
 	}
 }
 
 func outputPermissionsJSON(all, dangerous, normal []string) {
-	output := map[string]interface{}{
+	payload := map[string]interface{}{
 		"total":     len(all),
 		"dangerous": dangerous,
 		"normal":    normal,
@@ -140,9 +140,9 @@ func outputPermissionsJSON(all, dangerous, normal []string) {
 		}(),
 	}
 
-	data, err := json.MarshalIndent(output, "", "  ")
+	data, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
-		utils.PrintError("Failed to generate JSON: %v", err)
+		output.Error("Failed to generate JSON: %v", err)
 		return
 	}
 	fmt.Println(string(data))

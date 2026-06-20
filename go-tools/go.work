@@ -1,0 +1,10 @@
+go 1.26.1
+
+use (
+	./adb-toolkit
+	./apk-analyzer
+	./common
+	./ios-toolkit
+	./mobile-recon-cli
+	./nmap-toolkit
+)

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/utils"
+	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/spf13/cobra"
 )
 
@@ -39,7 +39,7 @@ Perfect for mobile security testing, app reverse engineering, and malware analys
 // Execute runs the root command and handles any errors.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		utils.PrintError("%v", err)
+		output.Error("%v", err)
 		os.Exit(1)
 	}
 }

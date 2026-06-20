@@ -8,7 +8,7 @@ import (
 	"sort"
 
 	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/apk"
-	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/utils"
+	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/spf13/cobra"
 )
 
@@ -41,15 +41,15 @@ func runSecurity(cmd *cobra.Command, args []string) {
 	apkPath := args[0]
 
 	if err := validateAPKPath(apkPath); err != nil {
-		utils.PrintError("%v", err)
+		output.Error("%v", err)
 		os.Exit(1)
 	}
 
-	utils.PrintInfo("Analyzing APK security...")
+	output.Info("Analyzing APK security...")
 
 	issues, err := apk.AnalyzeSecurity(apkPath)
 	if err != nil {
-		utils.PrintError("Security analysis failed: %v", err)
+		output.Error("Security analysis failed: %v", err)
 		os.Exit(1)
 	}
 
@@ -70,11 +70,11 @@ func runSecurity(cmd *cobra.Command, args []string) {
 	}
 
 	// Text output
-	utils.PrintSection("Security Analysis Results")
+	output.Section("Security Analysis Results")
 
 	if len(issues) == 0 && len(dangerousPerms) == 0 {
-		utils.PrintSuccess("No security issues detected")
-		utils.PrintInfo("Note: This is a static analysis and may not catch all vulnerabilities.")
+		output.Success("No security issues detected")
+		output.Info("Note: This is a static analysis and may not catch all vulnerabilities.")
 		return
 	}
 
@@ -91,9 +91,9 @@ func runSecurity(cmd *cobra.Command, args []string) {
 	}
 
 	// Print summary
-	utils.PrintKeyValue("Total Issues", fmt.Sprintf("%d", len(issues)))
+	output.KeyValue("Total Issues", fmt.Sprintf("%d", len(issues)))
 	if len(dangerousPerms) > 0 {
-		utils.PrintKeyValue("Dangerous Permissions", fmt.Sprintf("%d", len(dangerousPerms)))
+		output.KeyValue("Dangerous Permissions", fmt.Sprintf("%d", len(dangerousPerms)))
 	}
 	fmt.Println()
 
@@ -112,13 +112,13 @@ func runSecurity(cmd *cobra.Command, args []string) {
 
 		switch sev {
 		case "HIGH":
-			utils.Error.Printf("═══ HIGH SEVERITY (%d) ═══\n", len(sevIssues))
+			output.ErrorColor().Printf("═══ HIGH SEVERITY (%d) ═══\n", len(sevIssues))
 		case "MEDIUM":
-			utils.Warning.Printf("═══ MEDIUM SEVERITY (%d) ═══\n", len(sevIssues))
+			output.WarningColor().Printf("═══ MEDIUM SEVERITY (%d) ═══\n", len(sevIssues))
 		case "LOW":
-			utils.Info.Printf("═══ LOW SEVERITY (%d) ═══\n", len(sevIssues))
+			output.InfoColor().Printf("═══ LOW SEVERITY (%d) ═══\n", len(sevIssues))
 		case "INFO":
-			utils.Bold.Printf("═══ INFORMATIONAL (%d) ═══\n", len(sevIssues))
+			output.BoldColor().Printf("═══ INFORMATIONAL (%d) ═══\n", len(sevIssues))
 		}
 		fmt.Println()
 
@@ -133,11 +133,11 @@ func runSecurity(cmd *cobra.Command, args []string) {
 
 	// Print dangerous permissions
 	if len(dangerousPerms) > 0 {
-		utils.Warning.Println("═══ DANGEROUS PERMISSIONS ═══")
+		output.WarningColor().Println("═══ DANGEROUS PERMISSIONS ═══")
 		fmt.Println()
 		for _, perm := range dangerousPerms {
 			permInfo := apk.DangerousPermissions[perm]
-			utils.Warning.Printf("  • %s\n", permInfo.Name)
+			output.WarningColor().Printf("  • %s\n", permInfo.Name)
 			if verbose {
 				fmt.Printf("      %s (%s)\n", permInfo.Description, permInfo.Risk)
 			}
@@ -150,18 +150,18 @@ func runSecurity(cmd *cobra.Command, args []string) {
 	medCount := len(bySeverity["MEDIUM"])
 
 	if highCount > 0 {
-		utils.PrintError("Found %d high severity issue(s) - review recommended", highCount)
+		output.Error("Found %d high severity issue(s) - review recommended", highCount)
 	} else if medCount > 0 {
-		utils.PrintWarning("Found %d medium severity issue(s)", medCount)
+		output.Warning("Found %d medium severity issue(s)", medCount)
 	} else {
-		utils.PrintSuccess("No critical security issues found")
+		output.Success("No critical security issues found")
 	}
 
-	utils.PrintInfo("Note: Use 'apk-analyzer strings' for deeper secrets analysis")
+	output.Info("Note: Use 'apk-analyzer strings' for deeper secrets analysis")
 }
 
 func outputSecurityJSON(issues []apk.SecurityIssue, dangerousPerms []string) {
-	output := map[string]interface{}{
+	payload := map[string]interface{}{
 		"total_issues":         len(issues),
 		"issues":               issues,
 		"dangerous_permissions": dangerousPerms,
@@ -173,9 +173,9 @@ func outputSecurityJSON(issues []apk.SecurityIssue, dangerousPerms []string) {
 		},
 	}
 
-	data, err := json.MarshalIndent(output, "", "  ")
+	data, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
-		utils.PrintError("Failed to generate JSON: %v", err)
+		output.Error("Failed to generate JSON: %v", err)
 		return
 	}
 	fmt.Println(string(data))

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Build
 
-This is a multi-module Go repo — there is no `go.work`, so `go build ./...` from the repo root does **not** work. Each directory under `go-tools/` is a separate module linked by `replace` directives.
+This is a multi-module Go repo. Each directory under `go-tools/` is a separate module linked by `replace` directives. A `go-tools/go.work` workspace ties them together so IDE/tooling and cross-module builds resolve without manual `replace` juggling. However, `go-tools/` is not itself a module, so a single `go build ./...` covering every module still does **not** work — build per-module (a true one-shot build arrives with the planned single-module merge; see `docs/PLAN.md`).
 
 Build and vet all modules:
 ```bash

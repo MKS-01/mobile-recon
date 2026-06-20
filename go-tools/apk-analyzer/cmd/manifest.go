@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/apk"
-	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/utils"
+	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/spf13/cobra"
 )
 
@@ -44,19 +44,19 @@ func runManifest(cmd *cobra.Command, args []string) {
 	apkPath := args[0]
 
 	if err := validateAPKPath(apkPath); err != nil {
-		utils.PrintError("%v", err)
+		output.Error("%v", err)
 		os.Exit(1)
 	}
 
 	// Check if manifest exists
 	hasManifest, err := apk.HasFile(apkPath, "AndroidManifest.xml")
 	if err != nil {
-		utils.PrintError("Failed to check manifest: %v", err)
+		output.Error("Failed to check manifest: %v", err)
 		os.Exit(1)
 	}
 
 	if !hasManifest {
-		utils.PrintError("AndroidManifest.xml not found in APK")
+		output.Error("AndroidManifest.xml not found in APK")
 		os.Exit(1)
 	}
 
@@ -64,38 +64,38 @@ func runManifest(cmd *cobra.Command, args []string) {
 		// Extract raw manifest
 		err := apk.ExtractFile(apkPath, "AndroidManifest.xml", manifestOutput)
 		if err != nil {
-			utils.PrintError("Failed to extract manifest: %v", err)
+			output.Error("Failed to extract manifest: %v", err)
 			os.Exit(1)
 		}
-		utils.PrintSuccess("Manifest extracted to %s", manifestOutput)
-		utils.PrintInfo("Note: The extracted file is in binary XML format.")
-		utils.PrintInfo("Use 'apktool d %s' or 'aapt2 dump xmltree' to decompile it.", apkPath)
+		output.Success("Manifest extracted to %s", manifestOutput)
+		output.Info("Note: The extracted file is in binary XML format.")
+		output.Info("Use 'apktool d %s' or 'aapt2 dump xmltree' to decompile it.", apkPath)
 		return
 	}
 
 	// Analyze manifest
-	utils.PrintSection("AndroidManifest.xml Analysis")
+	output.Section("AndroidManifest.xml Analysis")
 
 	manifestData, err := apk.ReadManifestRaw(apkPath)
 	if err != nil {
-		utils.PrintError("Failed to read manifest: %v", err)
+		output.Error("Failed to read manifest: %v", err)
 		os.Exit(1)
 	}
 
-	utils.PrintKeyValue("Manifest Size", apk.FormatSize(int64(len(manifestData))))
+	output.KeyValue("Manifest Size", apk.FormatSize(int64(len(manifestData))))
 
 	// Extract what we can from binary format
 	info, err := apk.ParseManifestBasic(apkPath)
 	if err != nil {
-		utils.PrintWarning("Could not parse manifest details: %v", err)
+		output.Warning("Could not parse manifest details: %v", err)
 	} else {
 		if info.PackageName != "" {
-			utils.PrintKeyValue("Package Name", info.PackageName)
+			output.KeyValue("Package Name", info.PackageName)
 		}
 
 		if len(info.Permissions) > 0 {
 			fmt.Println()
-			utils.Bold.Printf("Permissions Found: %d\n", len(info.Permissions))
+			output.BoldColor().Printf("Permissions Found: %d\n", len(info.Permissions))
 			for _, perm := range info.Permissions {
 				fmt.Printf("  • %s\n", perm)
 			}
@@ -103,7 +103,7 @@ func runManifest(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println()
-	utils.PrintInfo("For complete manifest analysis, use:")
+	output.Info("For complete manifest analysis, use:")
 	fmt.Println("  apktool d", apkPath, "-o output/")
 	fmt.Println("  aapt2 dump xmltree", apkPath, "--file AndroidManifest.xml")
 }

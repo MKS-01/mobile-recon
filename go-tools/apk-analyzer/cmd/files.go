@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/apk"
-	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/utils"
+	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +46,7 @@ func runFiles(cmd *cobra.Command, args []string) {
 	apkPath := args[0]
 
 	if err := validateAPKPath(apkPath); err != nil {
-		utils.PrintError("%v", err)
+		output.Error("%v", err)
 		os.Exit(1)
 	}
 
@@ -59,17 +59,17 @@ func runFiles(cmd *cobra.Command, args []string) {
 
 		err := apk.ExtractFile(apkPath, extractPath, outputPath)
 		if err != nil {
-			utils.PrintError("Failed to extract: %v", err)
+			output.Error("Failed to extract: %v", err)
 			os.Exit(1)
 		}
-		utils.PrintSuccess("Extracted %s to %s", extractPath, outputPath)
+		output.Success("Extracted %s to %s", extractPath, outputPath)
 		return
 	}
 
 	// List files
 	files, err := apk.ListFiles(apkPath)
 	if err != nil {
-		utils.PrintError("Failed to list files: %v", err)
+		output.Error("Failed to list files: %v", err)
 		os.Exit(1)
 	}
 
@@ -100,8 +100,8 @@ func runFiles(cmd *cobra.Command, args []string) {
 	}
 
 	// Text output
-	utils.PrintSection("APK Contents")
-	utils.PrintKeyValue("Total Files", fmt.Sprintf("%d", len(files)))
+	output.Section("APK Contents")
+	output.KeyValue("Total Files", fmt.Sprintf("%d", len(files)))
 	fmt.Println()
 
 	if listTree {
@@ -138,7 +138,7 @@ func printTree(files []string) {
 	sort.Strings(dirs)
 
 	for _, dir := range dirs {
-		utils.Bold.Printf("%s/\n", dir)
+		output.BoldColor().Printf("%s/\n", dir)
 		for _, file := range tree[dir] {
 			fmt.Printf("  %s\n", file)
 		}
@@ -172,7 +172,7 @@ func showFileSummary(files []string) {
 		}
 	}
 
-	utils.Bold.Println("Summary:")
+	output.BoldColor().Println("Summary:")
 	for category, count := range counts {
 		if count > 0 {
 			fmt.Printf("  %-15s %d\n", category+":", count)
@@ -183,7 +183,7 @@ func showFileSummary(files []string) {
 func outputFilesJSON(files []string) {
 	data, err := json.MarshalIndent(files, "", "  ")
 	if err != nil {
-		utils.PrintError("Failed to generate JSON: %v", err)
+		output.Error("Failed to generate JSON: %v", err)
 		return
 	}
 	fmt.Println(string(data))

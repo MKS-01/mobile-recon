@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 
@@ -152,11 +153,19 @@ func (tm *ToolManager) DiscoverTools() error {
 		categories[kt.Category] = append(categories[kt.Category], tool)
 	}
 
-	for categoryName, tools := range categories {
+	// Sort category names so `list` output is deterministic (Go map
+	// iteration order is randomized).
+	names := make([]string, 0, len(categories))
+	for name := range categories {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	for _, categoryName := range names {
 		tm.Categories = append(tm.Categories, ToolCategory{
 			Name:        strings.ToLower(categoryName),
 			DisplayName: categoryName,
-			Tools:       tools,
+			Tools:       categories[categoryName],
 		})
 	}
 

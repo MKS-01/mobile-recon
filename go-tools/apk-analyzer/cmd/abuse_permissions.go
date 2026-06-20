@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/apk"
-	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/utils"
+	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -57,15 +57,15 @@ func runAbusePermissions(cmd *cobra.Command, args []string) {
 	apkPath := args[0]
 
 	if err := validateAPKPath(apkPath); err != nil {
-		utils.PrintError("%v", err)
+		output.Error("%v", err)
 		os.Exit(1)
 	}
 
-	utils.PrintInfo("Scanning for abusive permissions...")
+	output.Info("Scanning for abusive permissions...")
 
 	result, err := apk.AnalyzeAbusivePermissions(apkPath)
 	if err != nil {
-		utils.PrintError("Failed to analyze permissions: %v", err)
+		output.Error("Failed to analyze permissions: %v", err)
 		os.Exit(1)
 	}
 
@@ -75,34 +75,34 @@ func runAbusePermissions(cmd *cobra.Command, args []string) {
 	}
 
 	// Text output
-	utils.PrintSection("Abused Permissions Analysis")
+	output.Section("Abused Permissions Analysis")
 
 	if result.TotalPermissions == 0 {
-		utils.PrintInfo("No permissions detected from binary manifest.")
-		utils.PrintInfo("Use 'apktool d %s' for complete permission list.", apkPath)
+		output.Info("No permissions detected from binary manifest.")
+		output.Info("Use 'apktool d %s' for complete permission list.", apkPath)
 		return
 	}
 
-	utils.PrintKeyValue("Total Permissions", fmt.Sprintf("%d", result.TotalPermissions))
+	output.KeyValue("Total Permissions", fmt.Sprintf("%d", result.TotalPermissions))
 	fmt.Println()
 
 	// Malware Permissions
 	if len(result.MalwareMatches) > 0 {
-		utils.Error.Printf("Malware Permissions: %d/%d\n", len(result.MalwareMatches), len(apk.MalwarePermissions))
-		utils.Bold.Println("Top permissions that are widely abused by known malware")
+		output.ErrorColor().Printf("Malware Permissions: %d/%d\n", len(result.MalwareMatches), len(apk.MalwarePermissions))
+		output.BoldColor().Println("Top permissions that are widely abused by known malware")
 		fmt.Println()
 
 		printPermissionTable(result.MalwareMatches)
 	} else {
-		utils.PrintSuccess("No malware-associated permissions detected")
+		output.Success("No malware-associated permissions detected")
 		fmt.Println()
 	}
 
 	// Other Common Abused Permissions
 	if !malwareOnly && len(result.OtherMatches) > 0 {
 		fmt.Println()
-		utils.Warning.Printf("Other Common Permissions: %d/%d\n", len(result.OtherMatches), len(apk.OtherCommonAbusedPermissions))
-		utils.Bold.Println("Permissions that are commonly abused by known malware")
+		output.WarningColor().Printf("Other Common Permissions: %d/%d\n", len(result.OtherMatches), len(apk.OtherCommonAbusedPermissions))
+		output.BoldColor().Println("Permissions that are commonly abused by known malware")
 		fmt.Println()
 
 		printPermissionTable(result.OtherMatches)
@@ -115,7 +115,7 @@ func runAbusePermissions(cmd *cobra.Command, args []string) {
 
 func printPermissionTable(permissions []apk.AbusivePermission) {
 	// Print header
-	utils.Bold.Printf("  %-55s %-10s %-30s\n", "PERMISSION", "STATUS", "INFO")
+	output.BoldColor().Printf("  %-55s %-10s %-30s\n", "PERMISSION", "STATUS", "INFO")
 	fmt.Println(strings.Repeat("-", 100))
 
 	for _, perm := range permissions {
@@ -147,11 +147,11 @@ func formatPermissionName(perm string) string {
 func getStatusColor(status string) *color.Color {
 	switch status {
 	case "dangerous":
-		return utils.Error
+		return output.ErrorColor()
 	case "normal":
-		return utils.Info
+		return output.InfoColor()
 	default:
-		return utils.Warning
+		return output.WarningColor()
 	}
 }
 
@@ -204,19 +204,19 @@ func printAbuseSummary(result *apk.AbusivePermissionResult) {
 
 	if malwareCount >= 10 || dangerousCount >= 5 {
 		riskLevel = "HIGH"
-		riskColor = utils.Error
+		riskColor = output.ErrorColor()
 	} else if malwareCount >= 5 || dangerousCount >= 2 {
 		riskLevel = "MEDIUM"
-		riskColor = utils.Warning
+		riskColor = output.WarningColor()
 	} else if malwareCount > 0 {
 		riskLevel = "LOW"
-		riskColor = utils.Info
+		riskColor = output.InfoColor()
 	} else {
 		riskLevel = "MINIMAL"
-		riskColor = utils.Success
+		riskColor = output.SuccessColor()
 	}
 
-	utils.PrintSection("Summary")
+	output.Section("Summary")
 
 	fmt.Printf("  Malware Permissions:        %d\n", malwareCount)
 	fmt.Printf("  Other Abused Permissions:   %d\n", otherCount)
@@ -227,7 +227,7 @@ func printAbuseSummary(result *apk.AbusivePermissionResult) {
 
 	// Recommendations
 	if malwareCount > 0 {
-		utils.Warning.Println("Recommendations:")
+		output.WarningColor().Println("Recommendations:")
 		if dangerousCount > 0 {
 			fmt.Println("  • Review dangerous permissions for legitimate use case")
 		}
@@ -302,7 +302,7 @@ func outputAbusePermissionsJSON(result *apk.AbusivePermissionResult) {
 		riskLevel = "MINIMAL"
 	}
 
-	output := map[string]interface{}{
+	payload := map[string]interface{}{
 		"total_permissions": result.TotalPermissions,
 		"malware_permissions": map[string]interface{}{
 			"count":       len(result.MalwareMatches),
@@ -323,9 +323,9 @@ func outputAbusePermissionsJSON(result *apk.AbusivePermissionResult) {
 		"all_permissions": result.AllPermissions,
 	}
 
-	data, err := json.MarshalIndent(output, "", "  ")
+	data, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
-		utils.PrintError("Failed to generate JSON: %v", err)
+		output.Error("Failed to generate JSON: %v", err)
 		return
 	}
 	fmt.Println(string(data))

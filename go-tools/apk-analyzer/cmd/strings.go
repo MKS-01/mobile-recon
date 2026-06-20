@@ -8,7 +8,7 @@ import (
 	"sort"
 
 	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/apk"
-	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/utils"
+	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/spf13/cobra"
 )
 
@@ -56,7 +56,7 @@ func runStrings(cmd *cobra.Command, args []string) {
 	apkPath := args[0]
 
 	if err := validateAPKPath(apkPath); err != nil {
-		utils.PrintError("%v", err)
+		output.Error("%v", err)
 		os.Exit(1)
 	}
 
@@ -75,13 +75,13 @@ func runStrings(cmd *cobra.Command, args []string) {
 
 	if pattern != "" {
 		// Search with pattern
-		utils.PrintInfo("Searching for pattern: %s", pattern)
+		output.Info("Searching for pattern: %s", pattern)
 		results, err = apk.SearchStrings(apkPath, pattern)
 	} else if targetFile != "" {
 		// Extract from specific file
 		strings, err := apk.ExtractStrings(apkPath, targetFile, minStringLength)
 		if err != nil {
-			utils.PrintError("Failed to extract strings: %v", err)
+			output.Error("Failed to extract strings: %v", err)
 			os.Exit(1)
 		}
 		results = map[string][]string{targetFile: strings}
@@ -91,7 +91,7 @@ func runStrings(cmd *cobra.Command, args []string) {
 	}
 
 	if err != nil {
-		utils.PrintError("Failed to extract strings: %v", err)
+		output.Error("Failed to extract strings: %v", err)
 		os.Exit(1)
 	}
 
@@ -101,10 +101,10 @@ func runStrings(cmd *cobra.Command, args []string) {
 	}
 
 	// Text output
-	utils.PrintSection("String Extraction Results")
+	output.Section("String Extraction Results")
 
 	if len(results) == 0 {
-		utils.PrintInfo("No strings found matching criteria")
+		output.Info("No strings found matching criteria")
 		return
 	}
 
@@ -114,8 +114,8 @@ func runStrings(cmd *cobra.Command, args []string) {
 		totalStrings += len(strs)
 	}
 
-	utils.PrintKeyValue("Files Analyzed", fmt.Sprintf("%d", len(results)))
-	utils.PrintKeyValue("Strings Found", fmt.Sprintf("%d", totalStrings))
+	output.KeyValue("Files Analyzed", fmt.Sprintf("%d", len(results)))
+	output.KeyValue("Strings Found", fmt.Sprintf("%d", totalStrings))
 	fmt.Println()
 
 	// Sort files by name for consistent output
@@ -127,7 +127,7 @@ func runStrings(cmd *cobra.Command, args []string) {
 
 	for _, file := range files {
 		strs := results[file]
-		utils.Bold.Printf("─── %s (%d strings) ───\n", file, len(strs))
+		output.BoldColor().Printf("─── %s (%d strings) ───\n", file, len(strs))
 
 		// Deduplicate and limit output
 		seen := make(map[string]bool)
@@ -155,12 +155,12 @@ func runStrings(cmd *cobra.Command, args []string) {
 		}
 
 		if count > maxShow {
-			utils.PrintInfo("  ... and %d more (use -v for all)", count-maxShow)
+			output.Info("  ... and %d more (use -v for all)", count-maxShow)
 		}
 		fmt.Println()
 	}
 
-	utils.PrintSuccess("Extraction complete")
+	output.Success("Extraction complete")
 }
 
 func outputStringsJSON(results map[string][]string) {
@@ -180,7 +180,7 @@ func outputStringsJSON(results map[string][]string) {
 
 	data, err := json.MarshalIndent(deduped, "", "  ")
 	if err != nil {
-		utils.PrintError("Failed to generate JSON: %v", err)
+		output.Error("Failed to generate JSON: %v", err)
 		return
 	}
 	fmt.Println(string(data))

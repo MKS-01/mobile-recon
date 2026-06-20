@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/apk"
-	"github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/pkg/utils"
+	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/spf13/cobra"
 )
 
@@ -40,13 +40,13 @@ func runInfo(cmd *cobra.Command, args []string) {
 	apkPath := args[0]
 
 	if err := validateAPKPath(apkPath); err != nil {
-		utils.PrintError("%v", err)
+		output.Error("%v", err)
 		os.Exit(1)
 	}
 
 	info, err := apk.GetAPKInfo(apkPath)
 	if err != nil {
-		utils.PrintError("Failed to analyze APK: %v", err)
+		output.Error("Failed to analyze APK: %v", err)
 		os.Exit(1)
 	}
 
@@ -60,17 +60,17 @@ func runInfo(cmd *cobra.Command, args []string) {
 	}
 
 	// Text output
-	utils.PrintSection("APK Information")
+	output.Section("APK Information")
 
-	utils.PrintKeyValue("File Name", filepath.Base(apkPath))
-	utils.PrintKeyValue("File Path", apkPath)
-	utils.PrintKeyValue("File Size", apk.FormatSize(info.FileSize))
+	output.KeyValue("File Name", filepath.Base(apkPath))
+	output.KeyValue("File Path", apkPath)
+	output.KeyValue("File Size", apk.FormatSize(info.FileSize))
 
 	fmt.Println()
 
 	// DEX files
 	if len(dexFiles) > 0 {
-		utils.PrintKeyValue("DEX Files", fmt.Sprintf("%d", len(dexFiles)))
+		output.KeyValue("DEX Files", fmt.Sprintf("%d", len(dexFiles)))
 		if verbose {
 			for _, dex := range dexFiles {
 				fmt.Printf("  • %s\n", dex)
@@ -80,12 +80,12 @@ func runInfo(cmd *cobra.Command, args []string) {
 
 	// Native libraries
 	if info.HasNativeLib {
-		utils.PrintKeyValue("Native Code", "Yes")
-		utils.PrintKeyValue("Architectures", strings.Join(info.Architectures, ", "))
+		output.KeyValue("Native Code", "Yes")
+		output.KeyValue("Architectures", strings.Join(info.Architectures, ", "))
 
 		if verbose && len(nativeLibs) > 0 {
 			fmt.Println()
-			utils.Bold.Println("Native Libraries:")
+			output.BoldColor().Println("Native Libraries:")
 			for arch, libs := range nativeLibs {
 				fmt.Printf("  %s:\n", arch)
 				for _, lib := range libs {
@@ -94,14 +94,14 @@ func runInfo(cmd *cobra.Command, args []string) {
 			}
 		}
 	} else {
-		utils.PrintKeyValue("Native Code", "No")
+		output.KeyValue("Native Code", "No")
 	}
 
-	utils.PrintSuccess("Analysis complete")
+	output.Success("Analysis complete")
 }
 
 func outputJSON(info *apk.APKInfo, dexFiles []string, nativeLibs map[string][]string) {
-	output := map[string]interface{}{
+	payload := map[string]interface{}{
 		"file_path":     info.FilePath,
 		"file_size":     info.FileSize,
 		"has_native":    info.HasNativeLib,
@@ -110,9 +110,9 @@ func outputJSON(info *apk.APKInfo, dexFiles []string, nativeLibs map[string][]st
 		"native_libs":   nativeLibs,
 	}
 
-	data, err := json.MarshalIndent(output, "", "  ")
+	data, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
-		utils.PrintError("Failed to generate JSON: %v", err)
+		output.Error("Failed to generate JSON: %v", err)
 		return
 	}
 	fmt.Println(string(data))
