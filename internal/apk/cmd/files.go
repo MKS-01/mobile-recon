@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,6 +16,7 @@ import (
 var (
 	filterPattern string
 	extractPath   string
+	extractDest   string
 	listTree      bool
 )
 
@@ -30,7 +30,7 @@ Examples:
   mobile-recon apk files app.apk --filter "*.dex"
   mobile-recon apk files app.apk --filter "lib/*"
   mobile-recon apk files app.apk --tree
-  mobile-recon apk files app.apk --extract classes.dex -o ./output/`,
+  mobile-recon apk files app.apk --extract classes.dex --dest ./output/`,
 	Args: cobra.ExactArgs(1),
 	Run:  runFiles,
 }
@@ -39,6 +39,7 @@ func init() {
 	RootCmd.AddCommand(filesCmd)
 	filesCmd.Flags().StringVar(&filterPattern, "filter", "", "Filter files by pattern (glob)")
 	filesCmd.Flags().StringVar(&extractPath, "extract", "", "Extract specific file from APK")
+	filesCmd.Flags().StringVar(&extractDest, "dest", "", "Destination path for --extract (default: file's base name)")
 	filesCmd.Flags().BoolVar(&listTree, "tree", false, "Display as directory tree")
 }
 
@@ -53,8 +54,8 @@ func runFiles(cmd *cobra.Command, args []string) {
 	// Handle extraction
 	if extractPath != "" {
 		outputPath := filepath.Base(extractPath)
-		if outputFormat != "text" && outputFormat != "json" {
-			outputPath = outputFormat
+		if extractDest != "" {
+			outputPath = extractDest
 		}
 
 		err := apk.ExtractFile(apkPath, extractPath, outputPath)
@@ -94,7 +95,7 @@ func runFiles(cmd *cobra.Command, args []string) {
 
 	sort.Strings(files)
 
-	if outputFormat == "json" {
+	if output.IsJSON() {
 		outputFilesJSON(files)
 		return
 	}
@@ -147,12 +148,12 @@ func printTree(files []string) {
 
 func showFileSummary(files []string) {
 	counts := map[string]int{
-		"DEX files":      0,
-		"Native libs":    0,
-		"Resources":      0,
-		"Assets":         0,
-		"XML files":      0,
-		"Other":          0,
+		"DEX files":   0,
+		"Native libs": 0,
+		"Resources":   0,
+		"Assets":      0,
+		"XML files":   0,
+		"Other":       0,
 	}
 
 	for _, f := range files {
@@ -181,10 +182,7 @@ func showFileSummary(files []string) {
 }
 
 func outputFilesJSON(files []string) {
-	data, err := json.MarshalIndent(files, "", "  ")
-	if err != nil {
+	if err := output.JSON(files); err != nil {
 		output.Error("Failed to generate JSON: %v", err)
-		return
 	}
-	fmt.Println(string(data))
 }

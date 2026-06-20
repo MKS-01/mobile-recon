@@ -3,7 +3,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -69,7 +68,7 @@ func runAbusePermissions(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if outputFormat == "json" {
+	if output.IsJSON() {
 		outputAbusePermissionsJSON(result)
 		return
 	}
@@ -323,10 +322,7 @@ func outputAbusePermissionsJSON(result *apk.AbusivePermissionResult) {
 		"all_permissions": result.AllPermissions,
 	}
 
-	data, err := json.MarshalIndent(payload, "", "  ")
-	if err != nil {
+	if err := output.JSON(payload); err != nil {
 		output.Error("Failed to generate JSON: %v", err)
-		return
 	}
-	fmt.Println(string(data))
 }

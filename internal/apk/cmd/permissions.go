@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -65,7 +64,7 @@ func runPermissions(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	if outputFormat == "json" {
+	if output.IsJSON() {
 		outputPermissionsJSON(info.Permissions, dangerous, normal)
 		return
 	}
@@ -140,10 +139,7 @@ func outputPermissionsJSON(all, dangerous, normal []string) {
 		}(),
 	}
 
-	data, err := json.MarshalIndent(payload, "", "  ")
-	if err != nil {
+	if err := output.JSON(payload); err != nil {
 		output.Error("Failed to generate JSON: %v", err)
-		return
 	}
-	fmt.Println(string(data))
 }

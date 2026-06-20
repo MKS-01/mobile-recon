@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
@@ -64,7 +63,7 @@ func runSecurity(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	if outputFormat == "json" {
+	if output.IsJSON() {
 		outputSecurityJSON(issues, dangerousPerms)
 		return
 	}
@@ -162,8 +161,8 @@ func runSecurity(cmd *cobra.Command, args []string) {
 
 func outputSecurityJSON(issues []apk.SecurityIssue, dangerousPerms []string) {
 	payload := map[string]interface{}{
-		"total_issues":         len(issues),
-		"issues":               issues,
+		"total_issues":          len(issues),
+		"issues":                issues,
 		"dangerous_permissions": dangerousPerms,
 		"summary": map[string]int{
 			"high":   countBySeverity(issues, "HIGH"),
@@ -173,12 +172,9 @@ func outputSecurityJSON(issues []apk.SecurityIssue, dangerousPerms []string) {
 		},
 	}
 
-	data, err := json.MarshalIndent(payload, "", "  ")
-	if err != nil {
+	if err := output.JSON(payload); err != nil {
 		output.Error("Failed to generate JSON: %v", err)
-		return
 	}
-	fmt.Println(string(data))
 }
 
 func countBySeverity(issues []apk.SecurityIssue, severity string) int {

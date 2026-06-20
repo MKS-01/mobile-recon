@@ -55,6 +55,27 @@ create `internal/<name>/<name>.go` + `internal/<name>/cmd/`, then register the n
 `cmd.RootCmd` in `internal/cli/root.go` (via `register(...)` with a group ID). No
 `go.mod`/`replace` wiring is needed anymore.
 
+## Output & JSON
+
+`pkg/output` is the single console-output layer with a global text/JSON mode, wired to
+the root command's `--json`, `--no-color`, and `--quiet` flags (applied in a
+`PersistentPreRun`; `cobra.EnableTraverseRunHooks` is on so toolkit pre-runs still fire).
+
+When adding a command, use `output.Success/Info/Section/...` for human output (these
+route to stderr in JSON mode) and gate machine output on `output.IsJSON()`:
+
+```go
+if output.IsJSON() {
+    if err := output.JSON(payload); err != nil {
+        output.Error("Failed to generate JSON: %v", err)
+    }
+    return
+}
+// ... text rendering ...
+```
+
+So far only the `apk` toolkit emits JSON; `adb`/`nmap`/`ios` are text-only until migrated.
+
 ## Testing
 
 No test files exist yet. When adding tests, run them from the repo root: `go test ./...`.

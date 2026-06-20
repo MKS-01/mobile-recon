@@ -21,6 +21,13 @@ var toolGroups = []*cobra.Group{
 	{ID: "network", Title: "Network Tools"},
 }
 
+// Global output flags, applied in PersistentPreRun.
+var (
+	flagJSON    bool
+	flagNoColor bool
+	flagQuiet   bool
+)
+
 var (
 	rootCmd = &cobra.Command{
 		Use:   "mobile-recon",
@@ -29,14 +36,34 @@ var (
 
 Tools are grouped by category below. Run 'mobile-recon list' for descriptions,
 or 'mobile-recon <tool> --help' for a tool's subcommands.`,
+		// PersistentPreRun runs for every command. EnableTraverseRunHooks (set
+		// in init) ensures this fires in addition to a toolkit's own pre-run.
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			f := output.FormatText
+			if flagJSON {
+				f = output.FormatJSON
+			}
+			output.Configure(f, flagNoColor, flagQuiet)
+		},
 		Run: func(cmd *cobra.Command, args []string) {
-			printBanner()
+			if !flagJSON {
+				printBanner()
+			}
 			cmd.Help()
 		},
 	}
 )
 
 func init() {
+	// Run parent PersistentPreRun hooks in addition to the matched command's,
+	// so global output configuration applies even for toolkit subcommands that
+	// define their own PersistentPreRun (e.g. adb's ADB-installed check).
+	cobra.EnableTraverseRunHooks = true
+
+	rootCmd.PersistentFlags().BoolVar(&flagJSON, "json", false, "Output JSON instead of text (where supported)")
+	rootCmd.PersistentFlags().BoolVar(&flagNoColor, "no-color", false, "Disable colored output")
+	rootCmd.PersistentFlags().BoolVar(&flagQuiet, "quiet", false, "Suppress informational/decorative output")
+
 	for _, g := range toolGroups {
 		rootCmd.AddGroup(g)
 	}
