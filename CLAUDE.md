@@ -4,11 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Build
 
-This is a multi-module Go repo — there is no `go.work`, so `go build ./...` from the repo root does **not** work. Each directory under `go-tools/` is a separate module linked by `replace` directives.
+This is a **single Go module** rooted at the repo (`github.com/MKS-01/mobile-recon`).
+Everything compiles into one binary, so the standard one-shot commands work from the
+repo root:
 
-Build and vet all modules:
 ```bash
-for mod in go-tools/*/; do (cd "$mod" && go build ./... && go vet ./...); done
+go build ./...
+go vet ./...
 ```
 
 Or use the `/build-all` skill which does this with error reporting.
@@ -22,34 +24,41 @@ The install script is interactive on first run (PATH/alias prompts); subsequent 
 
 ## Lint
 
-golangci-lint is configured in `.golangci.yml` (standard defaults + misspell, unconvert). Run per-module:
+golangci-lint is configured in `.golangci.yml` (standard defaults + misspell, unconvert):
 ```bash
-(cd go-tools/<module> && golangci-lint run)
+golangci-lint run ./...
 ```
 
-Or use `/lint-all` to run across all modules.
+Or use `/lint-all`.
 
 ## Project Structure
 
-- `go-tools/mobile-recon-cli/` — unified CLI entry point, imports all toolkits via `replace` directives
-- `go-tools/adb-toolkit/` — Android device automation (ADB, Frida setup)
-- `go-tools/nmap-toolkit/` — network discovery and scanning
-- `go-tools/apk-analyzer/` — APK static analysis
-- `go-tools/ios-toolkit/` — iOS Simulator management with Frida
-- `go-tools/common/` — shared output/formatting utilities
+- `main.go` — thin entry point, calls `internal/cli`
+- `internal/cli/` — unified root command, banner, `list` (registers each toolkit and tags it with a cobra group)
+- `internal/adb/` — Android device automation (`adb.go` helper + `cmd/` cobra commands)
+- `internal/apk/` — APK static analysis (`apk.go` + `cmd/`)
+- `internal/nmap/` — network discovery and scanning (`nmap.go` + `cmd/`)
+- `internal/ios/` — iOS Simulator management with Frida (`ios.go` + `cmd/`)
+- `pkg/output/` — shared console output/formatting utilities
 - `scripts/` — install and scaffolding scripts
 
-All toolkits use Cobra for CLI structure. When adding commands, follow the existing `cmd/root.go` + per-subcommand file pattern.
+Each toolkit is `internal/<tool>/` with a helper package (`<tool>.go`, package `<tool>`)
+and a `cmd/` subpackage (package `cmd`) holding the Cobra command tree. The toolkit
+command packages are imported into `internal/cli` and registered in-process — there is
+**one** binary, no per-tool build/install step. When adding commands, follow the existing
+`cmd/root.go` + per-subcommand file pattern.
 
 ## Adding New Toolkits
 
-Use `/new-tool <name>` to scaffold. Note: `scripts/new-tool.sh` depends on a missing `.templates/` directory — the skill scaffolds manually by mirroring `ios-toolkit` (the smallest reference).
-
-New modules must be wired into `mobile-recon-cli` via `require` + `replace` in its `go.mod` and registered in `cmd/root.go` and `cmd/list.go`.
+Use `/new-tool <name>` to scaffold. Note: `scripts/new-tool.sh` predates the
+single-module layout — scaffold manually by mirroring `internal/ios` (the smallest
+reference): create `internal/<name>/<name>.go` + `internal/<name>/cmd/`, then register
+the new `cmd.RootCmd` in `internal/cli/root.go` (via `register(...)` with a group ID).
+No `go.mod`/`replace` wiring is needed anymore.
 
 ## Testing
 
-No test files exist yet. When adding tests, run them per-module: `(cd go-tools/<module> && go test ./...)`.
+No test files exist yet. When adding tests, run them from the repo root: `go test ./...`.
 
 ## Key Dependencies
 
