@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 
 	"github.com/MKS-01/mobile-recon/internal/adb"
+	"github.com/MKS-01/mobile-recon/pkg/frida"
 	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/ulikunitz/xz"
@@ -340,7 +340,7 @@ var fridaPsCmd = &cobra.Command{
 
 		output.Section("Running Processes")
 
-		if isFridaToolsInstalled() {
+		if frida.Installed() {
 			output.Info("Using local frida-ps...")
 			runLocalFridaPs()
 			return
@@ -356,42 +356,12 @@ var fridaPsCmd = &cobra.Command{
 	},
 }
 
-func isFridaToolsInstalled() bool {
-	_, err := os.Stat(getFridaPsPath())
-	return err == nil
-}
-
-func getFridaPsPath() string {
-	paths := []string{
-		"/usr/local/bin/frida-ps",
-		"/opt/homebrew/bin/frida-ps",
-	}
-
-	homeDir, _ := os.UserHomeDir()
-	if homeDir != "" {
-		paths = append(paths,
-			filepath.Join(homeDir, ".local/bin/frida-ps"),
-			filepath.Join(homeDir, "Library/Python/3.9/bin/frida-ps"),
-			filepath.Join(homeDir, "Library/Python/3.10/bin/frida-ps"),
-			filepath.Join(homeDir, "Library/Python/3.11/bin/frida-ps"),
-			filepath.Join(homeDir, "Library/Python/3.12/bin/frida-ps"),
-		)
-	}
-
-	for _, p := range paths {
-		if _, err := os.Stat(p); err == nil {
-			return p
-		}
-	}
-
-	if runtime.GOOS == "windows" {
-		return "frida-ps.exe"
-	}
-	return "frida-ps"
-}
-
 func runLocalFridaPs() {
-	fridaPs := getFridaPsPath()
+	fridaPs := frida.Locate("frida-ps")
+	if fridaPs == "" {
+		// Fall back to the bare name so exec can still resolve it via $PATH.
+		fridaPs = "frida-ps"
+	}
 	cmdOutput, err := adb.ExecuteCommand(fridaPs, "-U")
 	if err != nil {
 		output.Warning("frida-ps failed: %v", err)
