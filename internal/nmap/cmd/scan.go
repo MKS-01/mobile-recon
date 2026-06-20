@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/MKS-01/mobile-recon/internal/nmap"
+	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/spf13/cobra"
 )
 
@@ -36,6 +36,10 @@ var quickScanCmd = &cobra.Command{
 			return
 		}
 
+		if emitJSON(result) {
+			return
+		}
+
 		output.Success("Scan completed")
 		fmt.Println()
 		output.Data(result.Output)
@@ -58,7 +62,7 @@ var portScanCmd = &cobra.Command{
 			"verbose":    verbose,
 			"fast":       fast,
 			"aggressive": aggressive,
-			"stream":     stream,
+			"stream":     streaming(),
 		}
 
 		result, err := nmap.PortScan(target, ports, options)
@@ -67,8 +71,12 @@ var portScanCmd = &cobra.Command{
 			return
 		}
 
+		if emitJSON(result) {
+			return
+		}
+
 		output.Success("Scan completed")
-		if !stream {
+		if !streaming() {
 			fmt.Println()
 			output.Data(result.Output)
 		}
@@ -84,14 +92,18 @@ var networkScanCmd = &cobra.Command{
 		output.Header("Network Discovery Scan")
 		output.Info("Network: %s", network)
 
-		result, err := nmap.ScanNetwork(network, stream)
+		result, err := nmap.ScanNetwork(network, streaming())
 		if err != nil {
 			output.Error("Scan failed: %v", err)
 			return
 		}
 
+		if emitJSON(result) {
+			return
+		}
+
 		output.Success("Scan completed")
-		if !stream {
+		if !streaming() {
 			fmt.Println()
 			output.Data(result.Output)
 		}

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/MKS-01/mobile-recon/internal/ios"
+	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/spf13/cobra"
 )
 
@@ -56,20 +56,33 @@ func init() {
 }
 
 func runDeviceList(cmd *cobra.Command, args []string) {
-	output.Section("iOS Simulators")
-
 	simulators, err := ios.GetSimulators()
 	if err != nil {
 		output.Error("Failed to list simulators: %v", err)
 		return
 	}
 
-	// Group by runtime
-	byRuntime := make(map[string][]ios.Simulator)
+	// Filter to the simulators we'll show.
+	var sims []ios.Simulator
 	for _, sim := range simulators {
 		if !showAll && !sim.IsAvailable {
 			continue
 		}
+		sims = append(sims, sim)
+	}
+
+	if output.IsJSON() {
+		if err := output.JSON(sims); err != nil {
+			output.Error("Failed to generate JSON: %v", err)
+		}
+		return
+	}
+
+	output.Section("iOS Simulators")
+
+	// Group by runtime
+	byRuntime := make(map[string][]ios.Simulator)
+	for _, sim := range sims {
 		byRuntime[sim.Runtime] = append(byRuntime[sim.Runtime], sim)
 	}
 
@@ -205,6 +218,26 @@ func runDeviceInfo(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	arch, _ := ios.GetArchitecture()
+	apps, _ := ios.GetInstalledApps(sim.UDID)
+
+	if output.IsJSON() {
+		payload := map[string]interface{}{
+			"name":              sim.Name,
+			"udid":              sim.UDID,
+			"state":             sim.State,
+			"runtime":           sim.Runtime,
+			"device_type":       sim.DeviceType,
+			"data_path":         sim.DataPath,
+			"host_architecture": arch,
+			"installed_apps":    len(apps),
+		}
+		if err := output.JSON(payload); err != nil {
+			output.Error("Failed to generate JSON: %v", err)
+		}
+		return
+	}
+
 	output.Section("Simulator Info")
 
 	output.Success("Name: %s", sim.Name)
@@ -217,12 +250,8 @@ func runDeviceInfo(cmd *cobra.Command, args []string) {
 		output.Info("Data Path: %s", sim.DataPath)
 	}
 
-	// Show architecture
-	arch, _ := ios.GetArchitecture()
 	output.Info("Host Architecture: %s", arch)
 
-	// Show installed apps count
-	apps, _ := ios.GetInstalledApps(sim.UDID)
 	if len(apps) > 0 {
 		output.Info("Installed Apps: %d", len(apps))
 	}

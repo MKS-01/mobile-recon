@@ -74,7 +74,10 @@ if output.IsJSON() {
 // ... text rendering ...
 ```
 
-So far only the `apk` toolkit emits JSON; `adb`/`nmap`/`ios` are text-only until migrated.
+All four toolkits emit JSON for their data/listing/scan commands (`apk`; `adb` device/app/recon
+listings; `nmap` scans; `ios` device/app listings). Pure side-effecting actions (reboot, shell,
+install, tap, boot, frida attach/spawn/trace, logcat stream) remain text-only — they have no
+structured result to emit.
 
 ## Testing
 

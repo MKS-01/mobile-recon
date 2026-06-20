@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/MKS-01/mobile-recon/internal/adb"
 	"github.com/MKS-01/mobile-recon/pkg/output"
@@ -21,6 +22,13 @@ var deviceListCmd = &cobra.Command{
 		devices, err := adb.GetDevices()
 		if err != nil {
 			output.Error("Failed to get devices: %v", err)
+			return
+		}
+
+		if output.IsJSON() {
+			if err := output.JSON(devices); err != nil {
+				output.Error("Failed to generate JSON: %v", err)
+			}
 			return
 		}
 
@@ -55,26 +63,43 @@ var deviceInfoCmd = &cobra.Command{
 			return
 		}
 
+		prop := func(args ...string) string {
+			v, _ := adb.ExecuteCommandWithDevice(serial, append([]string{"shell"}, args...)...)
+			return strings.TrimSpace(v)
+		}
+
+		androidVer := prop("getprop", "ro.build.version.release")
+		sdkVer := prop("getprop", "ro.build.version.sdk")
+		brand := prop("getprop", "ro.product.brand")
+		model := prop("getprop", "ro.product.model")
+		resolution := prop("wm", "size")
+		density := prop("wm", "density")
+		battery := prop("dumpsys", "battery")
+
+		if output.IsJSON() {
+			payload := map[string]interface{}{
+				"serial":          serial,
+				"android_version": androidVer,
+				"sdk_version":     sdkVer,
+				"brand":           brand,
+				"model":           model,
+				"resolution":      resolution,
+				"density":         density,
+				"battery":         battery,
+			}
+			if err := output.JSON(payload); err != nil {
+				output.Error("Failed to generate JSON: %v", err)
+			}
+			return
+		}
+
 		output.Section(fmt.Sprintf("Device Info: %s", serial))
-
-		androidVer, _ := adb.ExecuteCommandWithDevice(serial, "shell", "getprop", "ro.build.version.release")
 		output.InfoColor().Printf("Android Version: %s\n", androidVer)
-
-		sdkVer, _ := adb.ExecuteCommandWithDevice(serial, "shell", "getprop", "ro.build.version.sdk")
 		output.InfoColor().Printf("SDK Version: %s\n", sdkVer)
-
-		brand, _ := adb.ExecuteCommandWithDevice(serial, "shell", "getprop", "ro.product.brand")
-		model, _ := adb.ExecuteCommandWithDevice(serial, "shell", "getprop", "ro.product.model")
 		output.InfoColor().Printf("Brand: %s\n", brand)
 		output.InfoColor().Printf("Model: %s\n", model)
-
-		resolution, _ := adb.ExecuteCommandWithDevice(serial, "shell", "wm", "size")
 		output.InfoColor().Printf("Resolution: %s\n", resolution)
-
-		density, _ := adb.ExecuteCommandWithDevice(serial, "shell", "wm", "density")
 		output.InfoColor().Printf("Density: %s\n", density)
-
-		battery, _ := adb.ExecuteCommandWithDevice(serial, "shell", "dumpsys", "battery")
 		output.InfoColor().Printf("\nBattery Info:\n%s\n", battery)
 	},
 }

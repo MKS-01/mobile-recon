@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/MKS-01/mobile-recon/internal/nmap"
+	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/spf13/cobra"
 )
 
@@ -29,14 +29,18 @@ var sslScanCmd = &cobra.Command{
 		output.Info("Target: %s", target)
 		output.Info("Port: %s", port)
 
-		result, err := nmap.SSLScan(target, port, stream)
+		result, err := nmap.SSLScan(target, port, streaming())
 		if err != nil {
 			output.Error("Scan failed: %v", err)
 			return
 		}
 
+		if emitJSON(result) {
+			return
+		}
+
 		output.Success("Scan completed")
-		if !stream {
+		if !streaming() {
 			fmt.Println()
 			output.Data(result.Output)
 		}

@@ -10,9 +10,9 @@ import (
 )
 
 type ScanResult struct {
-	Target  string
-	Output  string
-	Command string
+	Target  string `json:"target"`
+	Output  string `json:"output"`
+	Command string `json:"command"`
 }
 
 func IsNmapInstalled() bool {
