@@ -14,11 +14,13 @@ A comprehensive toolkit for static analysis of Android APK files.
 
 ## Installation
 
+This toolkit ships as part of the unified `mobile-recon` CLI:
+
 ```bash
-cd go-tools/apk-analyzer
-go build -o apk-analyzer
-go install  # Optional: install globally
+./scripts/install.sh        # from the repo root
 ```
+
+The APK commands are then available under `mobile-recon apk`.
 
 ## Usage
 
@@ -26,104 +28,104 @@ go install  # Optional: install globally
 
 ```bash
 # Basic info
-apk-analyzer info app.apk
+mobile-recon apk info app.apk
 
 # Verbose output
-apk-analyzer info app.apk -v
+mobile-recon apk info app.apk -v
 
 # JSON output
-apk-analyzer info app.apk -o json
+mobile-recon apk info app.apk -o json
 ```
 
 ### Analyze Manifest
 
 ```bash
 # Analyze manifest
-apk-analyzer manifest app.apk
+mobile-recon apk manifest app.apk
 
 # Extract raw manifest
-apk-analyzer manifest app.apk --extract -o AndroidManifest.xml
+mobile-recon apk manifest app.apk --extract -o AndroidManifest.xml
 ```
 
 ### Analyze Permissions
 
 ```bash
 # List all permissions
-apk-analyzer permissions app.apk
+mobile-recon apk permissions app.apk
 
 # Show only dangerous permissions
-apk-analyzer permissions app.apk --dangerous
+mobile-recon apk permissions app.apk --dangerous
 
 # JSON output
-apk-analyzer permissions app.apk -o json
+mobile-recon apk permissions app.apk -o json
 ```
 
 ### Detect Abusive Permissions
 
 ```bash
 # Scan for permissions commonly abused by malware
-apk-analyzer abuse-permissions app.apk
+mobile-recon apk abuse-permissions app.apk
 
 # Show only malware-associated permissions (high priority)
-apk-analyzer abuse-permissions app.apk --malware
+mobile-recon apk abuse-permissions app.apk --malware
 
 # Verbose output with detailed descriptions
-apk-analyzer abuse-permissions app.apk -v
+mobile-recon apk abuse-permissions app.apk -v
 
 # JSON output for integration
-apk-analyzer abuse-permissions app.apk -o json
+mobile-recon apk abuse-permissions app.apk -o json
 ```
 
 ### Extract Strings
 
 ```bash
 # Extract all strings (min length 6)
-apk-analyzer strings app.apk
+mobile-recon apk strings app.apk
 
 # Set minimum string length
-apk-analyzer strings app.apk --min 10
+mobile-recon apk strings app.apk --min 10
 
 # Search for patterns
-apk-analyzer strings app.apk --search "api|key|secret"
+mobile-recon apk strings app.apk --search "api|key|secret"
 
 # Extract only URLs
-apk-analyzer strings app.apk --urls
+mobile-recon apk strings app.apk --urls
 
 # Extract only email addresses
-apk-analyzer strings app.apk --emails
+mobile-recon apk strings app.apk --emails
 
 # Extract from specific file
-apk-analyzer strings app.apk --file classes.dex
+mobile-recon apk strings app.apk --file classes.dex
 ```
 
 ### Security Analysis
 
 ```bash
 # Run security analysis
-apk-analyzer security app.apk
+mobile-recon apk security app.apk
 
 # Verbose output with details
-apk-analyzer security app.apk -v
+mobile-recon apk security app.apk -v
 
 # JSON output
-apk-analyzer security app.apk -o json
+mobile-recon apk security app.apk -o json
 ```
 
 ### List/Extract Files
 
 ```bash
 # List all files
-apk-analyzer files app.apk
+mobile-recon apk files app.apk
 
 # List as tree
-apk-analyzer files app.apk --tree
+mobile-recon apk files app.apk --tree
 
 # Filter by pattern
-apk-analyzer files app.apk --filter "*.dex"
-apk-analyzer files app.apk --filter "lib/*"
+mobile-recon apk files app.apk --filter "*.dex"
+mobile-recon apk files app.apk --filter "lib/*"
 
 # Extract specific file
-apk-analyzer files app.apk --extract classes.dex
+mobile-recon apk files app.apk --extract classes.dex
 ```
 
 ## Security Checks
@@ -205,37 +207,37 @@ Use `-o json` flag for JSON output.
 ### Mobile Security Testing
 ```bash
 # Quick security overview
-apk-analyzer security app.apk
+mobile-recon apk security app.apk
 
 # Check permissions
-apk-analyzer permissions app.apk -d
+mobile-recon apk permissions app.apk -d
 ```
 
 ### Reverse Engineering
 ```bash
 # List all files
-apk-analyzer files app.apk --tree
+mobile-recon apk files app.apk --tree
 
 # Extract strings for analysis
-apk-analyzer strings app.apk --min 8 -o json > strings.json
+mobile-recon apk strings app.apk --min 8 -o json > strings.json
 ```
 
 ### Malware Analysis
 ```bash
 # Detect abusive permissions (primary malware indicator)
-apk-analyzer abuse-permissions app.apk -v
+mobile-recon apk abuse-permissions app.apk -v
 
 # Find suspicious URLs
-apk-analyzer strings app.apk --urls
+mobile-recon apk strings app.apk --urls
 
 # Security analysis
-apk-analyzer security app.apk -v
+mobile-recon apk security app.apk -v
 ```
 
 ### API Key Discovery
 ```bash
 # Search for API keys
-apk-analyzer strings app.apk --search "api[_-]?key|secret|token"
+mobile-recon apk strings app.apk --search "api[_-]?key|secret|token"
 ```
 
 ## Limitations
@@ -246,7 +248,7 @@ apk-analyzer strings app.apk --search "api[_-]?key|secret|token"
 
 ## Related Tools
 
-For complete APK analysis, consider using these tools alongside apk-analyzer:
+For complete APK analysis, consider using these tools alongside `mobile-recon apk`:
 
 - **apktool** - Full APK decompilation
 - **jadx** - DEX to Java decompiler

@@ -12,10 +12,13 @@ Unlike physical iOS devices, **iOS Simulators do NOT need jailbreaking** to use 
 
 ## Installation
 
+This toolkit ships as part of the unified `mobile-recon` CLI:
+
 ```bash
-cd go-tools/ios-toolkit
-go build -o ios-toolkit .
+./scripts/install.sh        # from the repo root
 ```
+
+The iOS commands are then available under `mobile-recon ios`.
 
 ## Prerequisites
 
@@ -29,44 +32,44 @@ go build -o ios-toolkit .
 
 ```bash
 # List all simulators
-ios-toolkit device list
+mobile-recon ios device list
 
 # Boot a simulator
-ios-toolkit device boot "iPhone 16 Pro"
+mobile-recon ios device boot "iPhone 16 Pro"
 
 # Shutdown simulators
-ios-toolkit device shutdown
+mobile-recon ios device shutdown
 
 # Get info about current simulator
-ios-toolkit device info
+mobile-recon ios device info
 ```
 
 ### Frida Commands
 
 ```bash
 # Verify Frida setup
-ios-toolkit frida setup
+mobile-recon ios frida setup
 
 # List running processes
-ios-toolkit frida ps
+mobile-recon ios frida ps
 
 # List installed apps
-ios-toolkit frida apps
+mobile-recon ios frida apps
 
 # Attach to a running app
-ios-toolkit frida attach com.example.app
+mobile-recon ios frida attach com.example.app
 
 # Spawn and attach (for early hooking)
-ios-toolkit frida spawn com.example.app
+mobile-recon ios frida spawn com.example.app
 
 # Spawn with a script
-ios-toolkit frida spawn -s hook.js com.example.app
+mobile-recon ios frida spawn -s hook.js com.example.app
 
 # Trace method calls
-ios-toolkit frida trace com.example.app
+mobile-recon ios frida trace com.example.app
 
 # Kill an app
-ios-toolkit frida kill com.example.app
+mobile-recon ios frida kill com.example.app
 ```
 
 ### Target Specific Simulator
@@ -74,7 +77,7 @@ ios-toolkit frida kill com.example.app
 Use the `-u` flag to target a specific simulator by UDID:
 
 ```bash
-ios-toolkit -u 12345678-ABCD-1234-ABCD-123456789ABC frida ps
+mobile-recon ios -u 12345678-ABCD-1234-ABCD-123456789ABC frida ps
 ```
 
 ## Frida Scripts for iOS
@@ -120,7 +123,7 @@ if (sslSetPeerDomainName) {
 ### "No booted simulator found"
 Boot a simulator first:
 ```bash
-ios-toolkit device boot "iPhone 16 Pro"
+mobile-recon ios device boot "iPhone 16 Pro"
 ```
 
 ### "Frida not found"

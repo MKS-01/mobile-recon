@@ -28,12 +28,15 @@ sudo apt install nmap
 sudo yum install nmap
 ```
 
-### Build
+### Install
+
+This toolkit ships as part of the unified `mobile-recon` CLI:
 
 ```bash
-cd go-tools/nmap-toolkit
-go build -o nmap-toolkit
+./scripts/install.sh        # from the repo root
 ```
+
+The Nmap commands are then available under `mobile-recon nmap`.
 
 ## Usage
 
@@ -41,62 +44,62 @@ go build -o nmap-toolkit
 
 ```bash
 # Quick ping scan to find live hosts
-nmap-toolkit scan quick 192.168.1.0/24
+mobile-recon nmap scan quick 192.168.1.0/24
 
 # Discover all devices on network
-nmap-toolkit scan network 192.168.1.0/24 --stream
+mobile-recon nmap scan network 192.168.1.0/24 --stream
 ```
 
 ### Port Scanning
 
 ```bash
 # Basic port scan
-nmap-toolkit scan port 192.168.1.100
+mobile-recon nmap scan port 192.168.1.100
 
 # Scan specific ports
-nmap-toolkit scan port 192.168.1.100 -p 80,443,8080
+mobile-recon nmap scan port 192.168.1.100 -p 80,443,8080
 
 # Fast scan (top 100 ports)
-nmap-toolkit scan port 192.168.1.100 --fast
+mobile-recon nmap scan port 192.168.1.100 --fast
 
 # Aggressive timing with real-time output
-nmap-toolkit scan port 192.168.1.100 --aggressive --stream
+mobile-recon nmap scan port 192.168.1.100 --aggressive --stream
 ```
 
 ### Service Detection
 
 ```bash
 # Detect services and versions
-nmap-toolkit detect service 192.168.1.100
+mobile-recon nmap detect service 192.168.1.100
 
 # Aggressive service detection
-nmap-toolkit detect service 192.168.1.100 --aggressive --stream
+mobile-recon nmap detect service 192.168.1.100 --aggressive --stream
 ```
 
 ### SSL/TLS Testing
 
 ```bash
 # Test SSL/TLS on default port 443
-nmap-toolkit ssl scan example.com
+mobile-recon nmap ssl scan example.com
 
 # Test SSL/TLS on custom port
-nmap-toolkit ssl scan 192.168.1.100 -p 8443
+mobile-recon nmap ssl scan 192.168.1.100 -p 8443
 ```
 
 ### Mobile Device Discovery
 
 ```bash
 # Find Android devices with ADB enabled
-nmap-toolkit mobile adb 192.168.1.0/24
+mobile-recon nmap mobile adb 192.168.1.0/24
 
 # Find iOS devices
-nmap-toolkit mobile ios 192.168.1.0/24
+mobile-recon nmap mobile ios 192.168.1.0/24
 
 # Mobile-optimized service scan
-nmap-toolkit mobile scan 192.168.1.100
+mobile-recon nmap mobile scan 192.168.1.100
 
 # Detect MITM proxies (Burp, Charles, mitmproxy)
-nmap-toolkit mobile mitm 192.168.1.0/24
+mobile-recon nmap mobile mitm 192.168.1.0/24
 ```
 
 ## Command Reference
@@ -127,17 +130,17 @@ nmap-toolkit mobile mitm 192.168.1.0/24
 
 ```bash
 # 1. Discover all devices on network
-nmap-toolkit scan network 192.168.1.0/24 --stream
+mobile-recon nmap scan network 192.168.1.0/24 --stream
 
 # 2. Find mobile devices
-nmap-toolkit mobile adb 192.168.1.0/24
-nmap-toolkit mobile ios 192.168.1.0/24
+mobile-recon nmap mobile adb 192.168.1.0/24
+mobile-recon nmap mobile ios 192.168.1.0/24
 
 # 3. Scan a specific device
-nmap-toolkit detect service 192.168.1.100 --stream
+mobile-recon nmap detect service 192.168.1.100 --stream
 
 # 4. Test SSL/TLS if applicable
-nmap-toolkit ssl scan 192.168.1.100 -p 443
+mobile-recon nmap ssl scan 192.168.1.100 -p 443
 ```
 
 ## Tips

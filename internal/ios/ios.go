@@ -260,13 +260,13 @@ func GetRunningProcesses(udid string) ([]Process, error) {
 func GetSimulatorPID() (string, error) {
 	output, err := ExecuteCommand("pgrep", "-f", "Simulator.app")
 	if err != nil {
-		return "", fmt.Errorf("Simulator.app not running")
+		return "", fmt.Errorf("simulator.app not running")
 	}
 	pids := strings.Split(strings.TrimSpace(output), "\n")
 	if len(pids) > 0 {
 		return pids[0], nil
 	}
-	return "", fmt.Errorf("Simulator.app not running")
+	return "", fmt.Errorf("simulator.app not running")
 }
 
 // BootSimulator boots a simulator by UDID.
