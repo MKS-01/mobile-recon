@@ -136,7 +136,7 @@ build-loop friction and version skew without moving files. (See Phase 0.)
 
 ## 3. Refactor plan (phased, each phase compiles & is shippable)
 
-### Phase 0 — Stop the bleeding (low risk, high payoff)
+### Phase 0 — Stop the bleeding (low risk, high payoff) ✅ done
 - Add `go.work` at repo root so `go build ./...` / `go vet ./...` / lint work in one
   shot. Update CLAUDE.md to drop the for-loop workaround.
 - Align dependency versions: bump nmap-toolkit to `cobra v1.10.1`; run `go mod tidy`
@@ -145,14 +145,16 @@ build-loop friction and version skew without moving files. (See Phase 0.)
   (map `PrintSuccess`→`Success`, etc.). Removes the duplicate output API.
 - Fix `list` ordering: sort categories and tools deterministically.
 
-### Phase 1 — Resolve the dual-model confusion
-- Delete the dead exec path: `RunTool`, `Available`, `Binary`, the `build`/`install`
-  cobra commands, and the on-disk binary probing in `DiscoverTools`.
-- Repurpose `tools.yaml` to *metadata only* (display name, description, category,
-  command alias) for `list` — or drop it and make `list` introspect `rootCmd.Commands()`
-  directly (preferred: single source of truth, no config drift).
-- Make `list` print from the live cobra command tree so it can never disagree with what
-  actually runs.
+### Phase 1 — Resolve the dual-model confusion ✅ done
+- ~~Delete the dead exec path: `RunTool`, `Available`, `Binary`, the `build`/`install`
+  cobra commands, and the on-disk binary probing in `DiscoverTools`.~~ Deleted the
+  entire `toolmanager` package, `build.go`, and `tools.yaml` (all dead) — dropped the
+  now-unused `gopkg.in/yaml.v3` dependency.
+- ~~Drop `tools.yaml` and make `list` introspect `rootCmd.Commands()` directly.~~ `list`
+  and `--help` now read from the live cobra command tree; categories are expressed as
+  cobra `Group`s (`Mobile Tools` / `Network Tools`) assigned at registration in
+  `root.go`. Single source of truth — `list` can no longer disagree with what runs, and
+  the misleading "✓ Available / ✗ Not built" status is gone.
 
 ### Phase 2 — Collapse the module sprawl (the big move)
 - Merge all six modules into one `go.mod` at repo root.

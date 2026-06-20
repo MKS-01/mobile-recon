@@ -10,7 +10,6 @@ require (
 	github.com/MKS-01/mobile-recon/go-tools/nmap-toolkit v0.0.0
 	github.com/fatih/color v1.18.0
 	github.com/spf13/cobra v1.10.1
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

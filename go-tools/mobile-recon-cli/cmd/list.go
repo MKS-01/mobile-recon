@@ -2,83 +2,52 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
-// getShortName derives a short command name from the tool name
-func getShortName(toolName string) string {
-	name := toolName
-	name = strings.TrimSuffix(name, "-toolkit")
-	name = strings.TrimSuffix(name, "-analyzer")
-	return name
+var listCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List all available tools",
+	Long:  `List all reconnaissance tools available in the toolkit, organized by category.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		listTools()
+	},
 }
-
-var (
-	showAll bool
-
-	listCmd = &cobra.Command{
-		Use:   "list",
-		Short: "List all available tools",
-		Long:  `List all reconnaissance tools available in the toolkit, organized by category.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			listTools()
-		},
-	}
-)
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	listCmd.Flags().BoolVarP(&showAll, "all", "a", false, "Show all tools including those not built")
 }
 
+// listTools prints the registered toolkit commands grouped by category. The
+// command tree is the single source of truth: every command shown here is
+// compiled into this binary and runnable, so there is no "built/not built"
+// distinction to report.
 func listTools() {
-	successColor := color.New(color.FgGreen)
-	warningColor := color.New(color.FgYellow)
 	infoColor := color.New(color.FgHiBlack)
 
 	output.Header("Available Reconnaissance Tools")
 	fmt.Println()
 
-	hasUnbuilt := false
-
-	for _, category := range toolMgr.Categories {
-		color.New(color.FgMagenta, color.Bold).Printf("▶ %s Tools\n", category.DisplayName)
+	for _, group := range toolGroups {
+		color.New(color.FgMagenta, color.Bold).Printf("▶ %s\n", group.Title)
 		output.Divider()
 
-		for _, tool := range category.Tools {
-			if !showAll && !tool.Available {
-				hasUnbuilt = true
+		for _, c := range rootCmd.Commands() {
+			if c.GroupID != group.ID {
 				continue
 			}
-
-			status := ""
-			if tool.Available {
-				status = successColor.Sprint("✓ Available")
-			} else {
-				status = warningColor.Sprint("✗ Not built")
-			}
-
-			fmt.Printf("  %-20s %s\n", color.CyanString(tool.DisplayName), status)
-			fmt.Printf("  %-20s %s\n", "", infoColor.Sprint(tool.Description))
-			fmt.Printf("  %-20s %s %s\n", "", infoColor.Sprint("Command:"), color.HiWhiteString("mobile-recon %s", getShortName(tool.Name)))
+			fmt.Printf("  %-12s %s\n", color.CyanString(c.Name()), infoColor.Sprint(c.Short))
+			fmt.Printf("  %-12s %s %s\n", "", infoColor.Sprint("Command:"), color.HiWhiteString("mobile-recon %s", c.Name()))
 			fmt.Println()
 		}
 	}
 
-	if hasUnbuilt && !showAll {
-		output.Info("Use --all or -a flag to show tools that are not yet built")
-		fmt.Println()
-	}
-
-	fmt.Println()
 	output.Header("Quick Start")
 	fmt.Println()
-	fmt.Printf("  Build a tool:     %s\n", color.HiWhiteString("mobile-recon build <tool-name>"))
-	fmt.Printf("  Build all tools:  %s\n", color.HiWhiteString("mobile-recon build --all"))
-	fmt.Printf("  Run a tool:       %s\n", color.HiWhiteString("mobile-recon <tool> [args...]"))
+	fmt.Printf("  Run a tool:    %s\n", color.HiWhiteString("mobile-recon <tool> [args...]"))
+	fmt.Printf("  Tool help:     %s\n", color.HiWhiteString("mobile-recon <tool> --help"))
 	fmt.Println()
 }

@@ -9,15 +9,19 @@ import (
 	apkcmd "github.com/MKS-01/mobile-recon/go-tools/apk-analyzer/cmd"
 	"github.com/MKS-01/mobile-recon/go-tools/common/output"
 	ioscmd "github.com/MKS-01/mobile-recon/go-tools/ios-toolkit/cmd"
-	"github.com/MKS-01/mobile-recon/go-tools/mobile-recon-cli/pkg/toolmanager"
 	nmapcmd "github.com/MKS-01/mobile-recon/go-tools/nmap-toolkit/cmd"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
-var (
-	toolMgr *toolmanager.ToolManager
+// toolGroups defines the categories used to organize toolkit commands in both
+// `--help` and `mobile-recon list`. Order here is the display order.
+var toolGroups = []*cobra.Group{
+	{ID: "mobile", Title: "Mobile Tools"},
+	{ID: "network", Title: "Network Tools"},
+}
 
+var (
 	rootCmd = &cobra.Command{
 		Use:   "mobile-recon",
 		Short: "Unified CLI for mobile reconnaissance tools",
@@ -46,18 +50,22 @@ Use 'mobile-recon list' to see all available tools.`,
 )
 
 func init() {
-	var err error
-	toolMgr, err = toolmanager.NewToolManager()
-	if err != nil {
-		output.Error("Failed to initialize tool manager: %v", err)
-		os.Exit(1)
+	for _, g := range toolGroups {
+		rootCmd.AddGroup(g)
 	}
 
-	// Register all toolkit commands as subcommands
-	rootCmd.AddCommand(adbcmd.RootCmd)
-	rootCmd.AddCommand(nmapcmd.RootCmd)
-	rootCmd.AddCommand(apkcmd.RootCmd)
-	rootCmd.AddCommand(ioscmd.RootCmd)
+	// Register each toolkit's root command, tagging it with a category group.
+	// The toolkit binaries are compiled directly into this CLI, so a registered
+	// command is always runnable — there is no separate build/install step.
+	register(adbcmd.RootCmd, "mobile")
+	register(apkcmd.RootCmd, "mobile")
+	register(ioscmd.RootCmd, "mobile")
+	register(nmapcmd.RootCmd, "network")
+}
+
+func register(cmd *cobra.Command, groupID string) {
+	cmd.GroupID = groupID
+	rootCmd.AddCommand(cmd)
 }
 
 func Execute() {
