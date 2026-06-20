@@ -1,17 +1,14 @@
 ---
 name: lint-all
-description: Run golangci-lint across every Go module in this repo. Use after making code changes to catch lint issues, or when the user asks to lint or check code quality.
+description: Run golangci-lint across the Go module in this repo. Use after making code changes to catch lint issues, or when the user asks to lint or check code quality.
 ---
 
-This repo is multi-module: each directory under `go-tools/` has its own `go.mod`. golangci-lint must be run per module.
+This repo is a single Go module rooted at the repo. golangci-lint runs once from the repo root.
 
-1. Run golangci-lint on each module:
+1. Run golangci-lint:
 
 ```bash
-for mod in go-tools/*/; do
-  echo "=== $mod ==="
-  (cd "$mod" && golangci-lint run ./...) || echo "FAILED: $mod"
-done
+golangci-lint run ./...
 ```
 
 2. If golangci-lint is not installed, install it first:
@@ -20,4 +17,4 @@ done
 brew install golangci-lint
 ```
 
-3. Report which modules passed and show full linter output for any findings.
+3. Report pass/fail and show full linter output for any findings.

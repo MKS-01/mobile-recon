@@ -28,11 +28,11 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Script directory and project root
+# Script directory and project root. The repo is a single Go module rooted here,
+# so the CLI is built from the project root.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-GO_TOOLS_DIR="$PROJECT_ROOT/go-tools"
-CLI_DIR="$GO_TOOLS_DIR/mobile-recon-cli"
+CLI_DIR="$PROJECT_ROOT"
 
 # Verbose mode
 VERBOSE=false
