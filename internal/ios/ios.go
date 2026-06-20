@@ -22,17 +22,17 @@ type Simulator struct {
 
 // App represents an installed application on a simulator.
 type App struct {
-	BundleID      string
-	Name          string
-	Path          string
-	DataPath      string
-	BundleVersion string
+	BundleID      string `json:"bundle_id"`
+	Name          string `json:"name,omitempty"`
+	Path          string `json:"path,omitempty"`
+	DataPath      string `json:"data_path,omitempty"`
+	BundleVersion string `json:"bundle_version,omitempty"`
 }
 
 // Process represents a running process in the simulator.
 type Process struct {
-	PID  string
-	Name string
+	PID  string `json:"pid"`
+	Name string `json:"name"`
 }
 
 // SimctlDevices represents the JSON structure from `simctl list devices`.

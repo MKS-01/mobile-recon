@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/MKS-01/mobile-recon/internal/nmap"
+	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/spf13/cobra"
 )
 
@@ -29,14 +29,18 @@ var androidADBCmd = &cobra.Command{
 		output.Info("Scanning ports: 5555-5559")
 		output.Warning("Only devices with TCP/IP debugging enabled will be detected")
 
-		result, err := nmap.AndroidADBScan(network, stream)
+		result, err := nmap.AndroidADBScan(network, streaming())
 		if err != nil {
 			output.Error("Scan failed: %v", err)
 			return
 		}
 
+		if emitJSON(result) {
+			return
+		}
+
 		output.Success("Scan completed")
-		if !stream {
+		if !streaming() {
 			fmt.Println()
 			output.Data(result.Output)
 			fmt.Println()
@@ -56,14 +60,18 @@ var mobileScanCmd = &cobra.Command{
 		output.Info("Target: %s", target)
 		output.Info("Scanning mobile-specific ports and services")
 
-		result, err := nmap.MobileScan(target, stream)
+		result, err := nmap.MobileScan(target, streaming())
 		if err != nil {
 			output.Error("Scan failed: %v", err)
 			return
 		}
 
+		if emitJSON(result) {
+			return
+		}
+
 		output.Success("Scan completed")
-		if !stream {
+		if !streaming() {
 			fmt.Println()
 			output.Data(result.Output)
 		}
@@ -88,14 +96,18 @@ var iosCmd = &cobra.Command{
 			network,
 		}
 
-		result, err := nmap.CustomScan(nmapArgs, stream)
+		result, err := nmap.CustomScan(nmapArgs, streaming())
 		if err != nil {
 			output.Error("Scan failed: %v", err)
 			return
 		}
 
+		if emitJSON(result) {
+			return
+		}
+
 		output.Success("Scan completed")
-		if !stream {
+		if !streaming() {
 			fmt.Println()
 			output.Data(result.Output)
 		}
@@ -120,14 +132,18 @@ var mitmProxyCmd = &cobra.Command{
 			network,
 		}
 
-		result, err := nmap.CustomScan(nmapArgs, stream)
+		result, err := nmap.CustomScan(nmapArgs, streaming())
 		if err != nil {
 			output.Error("Scan failed: %v", err)
 			return
 		}
 
+		if emitJSON(result) {
+			return
+		}
+
 		output.Success("Scan completed")
-		if !stream {
+		if !streaming() {
 			fmt.Println()
 			output.Data(result.Output)
 		}

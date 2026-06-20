@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/MKS-01/mobile-recon/internal/nmap"
+	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/spf13/cobra"
 )
 
@@ -29,14 +29,18 @@ var serviceDetectCmd = &cobra.Command{
 			output.Info("Mode: Aggressive (intensity 9)")
 		}
 
-		result, err := nmap.ServiceVersionScan(target, ports, aggressive, stream)
+		result, err := nmap.ServiceVersionScan(target, ports, aggressive, streaming())
 		if err != nil {
 			output.Error("Detection failed: %v", err)
 			return
 		}
 
+		if emitJSON(result) {
+			return
+		}
+
 		output.Success("Detection completed")
-		if !stream {
+		if !streaming() {
 			fmt.Println()
 			output.Data(result.Output)
 		}

@@ -9,12 +9,12 @@ import (
 )
 
 type Device struct {
-	Serial      string
-	State       string
-	Product     string
-	Model       string
-	Device      string
-	TransportID string
+	Serial      string `json:"serial"`
+	State       string `json:"state"`
+	Product     string `json:"product,omitempty"`
+	Model       string `json:"model,omitempty"`
+	Device      string `json:"device,omitempty"`
+	TransportID string `json:"transport_id,omitempty"`
 }
 
 func ExecuteCommand(args ...string) (string, error) {

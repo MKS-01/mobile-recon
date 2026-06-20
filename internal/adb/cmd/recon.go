@@ -16,6 +16,48 @@ var reconCmd = &cobra.Command{
 	Long:  "Tools for security research, penetration testing, and reverse engineering",
 }
 
+// extractComponents pulls component names (pkg/...) from a `dumpsys package`
+// resolver table that begins at the given marker line.
+func extractComponents(dump, packageName, marker string) []string {
+	var comps []string
+	inSection := false
+	for _, line := range strings.Split(dump, "\n") {
+		trimmed := strings.TrimSpace(line)
+		if strings.Contains(trimmed, marker) {
+			inSection = true
+			continue
+		}
+		if !inSection {
+			continue
+		}
+		if trimmed == "" || !strings.HasPrefix(line, " ") {
+			break
+		}
+		if strings.Contains(trimmed, packageName) && strings.Contains(trimmed, "/") {
+			for _, part := range strings.Fields(trimmed) {
+				if strings.Contains(part, packageName+"/") {
+					comps = append(comps, strings.Split(part, " ")[0])
+				}
+			}
+		}
+	}
+	return comps
+}
+
+// renderComponents prints a component list as JSON or as a text section.
+func renderComponents(section string, comps []string) {
+	if output.IsJSON() {
+		if err := output.JSON(comps); err != nil {
+			output.Error("Failed to generate JSON: %v", err)
+		}
+		return
+	}
+	output.Section(section)
+	for _, c := range comps {
+		fmt.Println(c)
+	}
+}
+
 var reconLogcatCmd = &cobra.Command{
 	Use:   "logcat [filter]",
 	Short: "Monitor device logs (filtered)",
@@ -115,7 +157,6 @@ var reconActivitiesCmd = &cobra.Command{
 		}
 
 		packageName := args[0]
-		output.Section(fmt.Sprintf("Activities: %s", packageName))
 
 		dump, err := adb.ExecuteCommandWithDevice(serial, "shell", "dumpsys", "package", packageName)
 		if err != nil {
@@ -123,33 +164,8 @@ var reconActivitiesCmd = &cobra.Command{
 			return
 		}
 
-		lines := strings.Split(dump, "\n")
-		inActivitySection := false
-
-		for _, line := range lines {
-			trimmed := strings.TrimSpace(line)
-
-			if strings.Contains(trimmed, "Activity Resolver Table:") {
-				inActivitySection = true
-				continue
-			}
-
-			if inActivitySection {
-				if trimmed == "" || !strings.HasPrefix(line, " ") {
-					break
-				}
-
-				if strings.Contains(trimmed, packageName) && strings.Contains(trimmed, "/") {
-					parts := strings.Fields(trimmed)
-					for _, part := range parts {
-						if strings.Contains(part, packageName+"/") {
-							activity := strings.Split(part, " ")[0]
-							fmt.Println(activity)
-						}
-					}
-				}
-			}
-		}
+		renderComponents(fmt.Sprintf("Activities: %s", packageName),
+			extractComponents(dump, packageName, "Activity Resolver Table:"))
 	},
 }
 
@@ -165,7 +181,6 @@ var reconServicesCmd = &cobra.Command{
 		}
 
 		packageName := args[0]
-		output.Section(fmt.Sprintf("Services: %s", packageName))
 
 		dump, err := adb.ExecuteCommandWithDevice(serial, "shell", "dumpsys", "package", packageName)
 		if err != nil {
@@ -173,33 +188,8 @@ var reconServicesCmd = &cobra.Command{
 			return
 		}
 
-		lines := strings.Split(dump, "\n")
-		inServiceSection := false
-
-		for _, line := range lines {
-			trimmed := strings.TrimSpace(line)
-
-			if strings.Contains(trimmed, "Service Resolver Table:") {
-				inServiceSection = true
-				continue
-			}
-
-			if inServiceSection {
-				if trimmed == "" || !strings.HasPrefix(line, " ") {
-					break
-				}
-
-				if strings.Contains(trimmed, packageName) && strings.Contains(trimmed, "/") {
-					parts := strings.Fields(trimmed)
-					for _, part := range parts {
-						if strings.Contains(part, packageName+"/") {
-							service := strings.Split(part, " ")[0]
-							fmt.Println(service)
-						}
-					}
-				}
-			}
-		}
+		renderComponents(fmt.Sprintf("Services: %s", packageName),
+			extractComponents(dump, packageName, "Service Resolver Table:"))
 	},
 }
 
@@ -215,7 +205,6 @@ var reconBroadcastCmd = &cobra.Command{
 		}
 
 		packageName := args[0]
-		output.Section(fmt.Sprintf("Broadcast Receivers: %s", packageName))
 
 		dump, err := adb.ExecuteCommandWithDevice(serial, "shell", "dumpsys", "package", packageName)
 		if err != nil {
@@ -223,33 +212,8 @@ var reconBroadcastCmd = &cobra.Command{
 			return
 		}
 
-		lines := strings.Split(dump, "\n")
-		inReceiverSection := false
-
-		for _, line := range lines {
-			trimmed := strings.TrimSpace(line)
-
-			if strings.Contains(trimmed, "Receiver Resolver Table:") {
-				inReceiverSection = true
-				continue
-			}
-
-			if inReceiverSection {
-				if trimmed == "" || !strings.HasPrefix(line, " ") {
-					break
-				}
-
-				if strings.Contains(trimmed, packageName) && strings.Contains(trimmed, "/") {
-					parts := strings.Fields(trimmed)
-					for _, part := range parts {
-						if strings.Contains(part, packageName+"/") {
-							receiver := strings.Split(part, " ")[0]
-							fmt.Println(receiver)
-						}
-					}
-				}
-			}
-		}
+		renderComponents(fmt.Sprintf("Broadcast Receivers: %s", packageName),
+			extractComponents(dump, packageName, "Receiver Resolver Table:"))
 	},
 }
 
@@ -373,24 +337,34 @@ var reconProcsCmd = &cobra.Command{
 			return
 		}
 
-		output.Section("Running Processes")
-
 		cmdOutput, err := adb.ExecuteCommandWithDevice(serial, "shell", "ps")
 		if err != nil {
 			output.Error("Failed to get processes: %v", err)
 			return
 		}
 
+		lines := strings.Split(strings.TrimRight(cmdOutput, "\n"), "\n")
 		if len(args) > 0 {
 			filter := args[0]
-			lines := strings.Split(cmdOutput, "\n")
+			var filtered []string
 			for _, line := range lines {
 				if strings.Contains(line, filter) {
-					fmt.Println(line)
+					filtered = append(filtered, line)
 				}
 			}
-		} else {
-			fmt.Println(cmdOutput)
+			lines = filtered
+		}
+
+		if output.IsJSON() {
+			if err := output.JSON(lines); err != nil {
+				output.Error("Failed to generate JSON: %v", err)
+			}
+			return
+		}
+
+		output.Section("Running Processes")
+		for _, line := range lines {
+			fmt.Println(line)
 		}
 	},
 }

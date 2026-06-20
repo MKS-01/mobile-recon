@@ -199,10 +199,11 @@ These are small, broadly useful, and become easy once Phase 0/1 land:
 1. **Global `--json` output.** ✅ done (foundation). `pkg/output` now has a text/JSON
    mode: in JSON mode status messages go to stderr and a command emits its payload via
    `output.JSON(v)` on stdout. Global `--json` flag on the root command, applied in a
-   `PersistentPreRun` (with `cobra.EnableTraverseRunHooks`). **apk** is fully migrated
-   (its old overloaded `-o` flag is gone; `files --extract` now uses `--dest`).
-   *Follow-up:* migrate `adb`/`nmap`/`ios` commands to emit JSON too (and `apk manifest`,
-   which is still text-only).
+   `PersistentPreRun` (with `cobra.EnableTraverseRunHooks`). Migrated across **all four
+   toolkits**: `apk` (overloaded `-o` gone; `files --extract` now uses `--dest`), `adb`
+   (device/app/recon listings), `nmap` (all scans — streaming auto-disabled in JSON mode),
+   and `ios` (device/app listings). Pure side-effecting actions (reboot, shell, install,
+   tap, boot, frida attach/spawn/trace, logcat stream) stay text-only by design.
 2. **Global `--quiet` / `--no-color` / `NO_COLOR` support.** ✅ done. `--no-color` sets
    `color.NoColor`; `--quiet` suppresses Info/Header/Section/Divider and the banner.
    (`fatih/color` already honors the `NO_COLOR` env var.)

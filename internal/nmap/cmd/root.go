@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/MKS-01/mobile-recon/internal/nmap"
+	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/spf13/cobra"
 )
 
@@ -45,6 +45,24 @@ func Execute() {
 		output.Error("%v", err)
 		os.Exit(1)
 	}
+}
+
+// emitJSON writes a scan result as JSON when in JSON mode and reports whether
+// it handled output (so the caller can return before printing text).
+func emitJSON(result *nmap.ScanResult) bool {
+	if !output.IsJSON() {
+		return false
+	}
+	if err := output.JSON(result); err != nil {
+		output.Error("Failed to generate JSON: %v", err)
+	}
+	return true
+}
+
+// streaming reports whether to stream live nmap output. Streaming is disabled
+// in JSON mode so the raw report does not corrupt the JSON document.
+func streaming() bool {
+	return stream && !output.IsJSON()
 }
 
 func init() {

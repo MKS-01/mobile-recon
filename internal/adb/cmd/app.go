@@ -49,16 +49,25 @@ var appListCmd = &cobra.Command{
 			return
 		}
 
-		packages := strings.Split(cmdOutput, "\n")
-		output.Section("Installed Packages")
-
-		for _, pkg := range packages {
-			pkg = strings.TrimPrefix(pkg, "package:")
+		var packages []string
+		for _, pkg := range strings.Split(cmdOutput, "\n") {
+			pkg = strings.TrimPrefix(strings.TrimSpace(pkg), "package:")
 			if pkg != "" {
-				fmt.Println(pkg)
+				packages = append(packages, pkg)
 			}
 		}
 
+		if output.IsJSON() {
+			if err := output.JSON(packages); err != nil {
+				output.Error("Failed to generate JSON: %v", err)
+			}
+			return
+		}
+
+		output.Section("Installed Packages")
+		for _, pkg := range packages {
+			fmt.Println(pkg)
+		}
 		output.Info("Total packages: %d", len(packages))
 	},
 }
@@ -175,37 +184,64 @@ var appInfoCmd = &cobra.Command{
 		}
 
 		packageName := args[0]
-		output.Section(fmt.Sprintf("Package Info: %s", packageName))
 
 		path, _ := adb.ExecuteCommandWithDevice(serial, "shell", "pm", "path", packageName)
-		output.InfoColor().Printf("APK Path: %s\n", strings.TrimPrefix(path, "package:"))
+		apkPath := strings.TrimPrefix(strings.TrimSpace(path), "package:")
 
 		dump, _ := adb.ExecuteCommandWithDevice(serial, "shell", "dumpsys", "package", packageName)
 
-		lines := strings.Split(dump, "\n")
-		for _, line := range lines {
+		var versionCode, versionName string
+		for _, line := range strings.Split(dump, "\n") {
 			line = strings.TrimSpace(line)
-			if strings.HasPrefix(line, "versionCode=") || strings.HasPrefix(line, "versionName=") {
-				output.InfoColor().Println(line)
+			if v, ok := strings.CutPrefix(line, "versionCode="); ok {
+				versionCode = strings.Fields(v)[0]
+			} else if v, ok := strings.CutPrefix(line, "versionName="); ok {
+				versionName = v
 			}
 		}
 
-		output.Info("\nPermissions:")
-		perms, _ := adb.ExecuteCommandWithDevice(serial, "shell", "dumpsys", "package", packageName)
-		permLines := strings.Split(perms, "\n")
+		var permissions []string
 		inPermSection := false
-		for _, line := range permLines {
+		for _, line := range strings.Split(dump, "\n") {
 			if strings.Contains(line, "requested permissions:") {
 				inPermSection = true
 				continue
 			}
 			if inPermSection && strings.TrimSpace(line) != "" {
-				if strings.HasPrefix(strings.TrimSpace(line), "android.permission") {
-					fmt.Println("  " + strings.TrimSpace(line))
-				} else if !strings.HasPrefix(strings.TrimSpace(line), " ") {
+				trimmed := strings.TrimSpace(line)
+				if strings.HasPrefix(trimmed, "android.permission") {
+					permissions = append(permissions, trimmed)
+				} else if !strings.HasPrefix(line, " ") {
 					break
 				}
 			}
+		}
+
+		if output.IsJSON() {
+			payload := map[string]interface{}{
+				"package":      packageName,
+				"apk_path":     apkPath,
+				"version_code": versionCode,
+				"version_name": versionName,
+				"permissions":  permissions,
+			}
+			if err := output.JSON(payload); err != nil {
+				output.Error("Failed to generate JSON: %v", err)
+			}
+			return
+		}
+
+		output.Section(fmt.Sprintf("Package Info: %s", packageName))
+		output.InfoColor().Printf("APK Path: %s\n", apkPath)
+		if versionCode != "" {
+			output.InfoColor().Printf("versionCode=%s\n", versionCode)
+		}
+		if versionName != "" {
+			output.InfoColor().Printf("versionName=%s\n", versionName)
+		}
+		output.Info("\nPermissions:")
+		for _, p := range permissions {
+			fmt.Println("  " + p)
 		}
 	},
 }

@@ -266,6 +266,13 @@ func runFridaApps(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	if output.IsJSON() {
+		if err := output.JSON(apps); err != nil {
+			output.Error("Failed to generate JSON: %v", err)
+		}
+		return
+	}
+
 	if len(apps) == 0 {
 		output.Info("No third-party apps installed")
 		fmt.Println("\n  Install an app with:")
