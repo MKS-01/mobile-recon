@@ -1,12 +1,30 @@
-// Package output provides formatted console output utilities.
+// Package output provides formatted console output utilities with a global
+// text/JSON mode.
+//
+// In JSON mode, status and decorative messages (Info, Success, Section, …) are
+// written to stderr so that stdout carries only the JSON document a command
+// emits via JSON(). Errors always go to stderr. This keeps `--json` output
+// pipeable (e.g. into jq) while preserving human-readable progress on stderr.
 package output
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"text/tabwriter"
 
 	"github.com/fatih/color"
+)
+
+// Format selects how command output is rendered.
+type Format int
+
+const (
+	// FormatText is the default human-readable, colorized output.
+	FormatText Format = iota
+	// FormatJSON emits a JSON document on stdout; status goes to stderr.
+	FormatJSON
 )
 
 var (
@@ -18,63 +36,115 @@ var (
 	boldColor    = color.New(color.Bold)
 )
 
-// Success prints a green success message with checkmark.
-func Success(format string, args ...interface{}) {
-	successColor.Printf("✓ "+format+"\n", args...)
+var (
+	format = FormatText
+	quiet  bool
+)
+
+// Configure sets the global output mode. noColor disables ANSI colors; q
+// (quiet) suppresses informational and decorative output (Info, Header,
+// Section, Divider). It is typically called once from the root command's
+// PersistentPreRun based on global flags.
+func Configure(f Format, noColor, q bool) {
+	format = f
+	quiet = q
+	if noColor {
+		color.NoColor = true
+	}
 }
 
-// Error prints a red error message with X symbol.
+// IsJSON reports whether output is in JSON mode.
+func IsJSON() bool { return format == FormatJSON }
+
+// statusOut returns the writer for status/decorative messages: stderr in JSON
+// mode (so stdout stays pure JSON), stdout otherwise.
+func statusOut() io.Writer {
+	if format == FormatJSON {
+		return os.Stderr
+	}
+	return os.Stdout
+}
+
+// JSON encodes v as indented JSON to stdout. Commands use this for their result
+// payload when IsJSON() is true.
+func JSON(v interface{}) error {
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	return enc.Encode(v)
+}
+
+// Success prints a green success message with a checkmark.
+func Success(format string, args ...interface{}) {
+	successColor.Fprintf(statusOut(), "✓ "+format+"\n", args...)
+}
+
+// Error prints a red error message with an X symbol. Always to stderr.
 func Error(format string, args ...interface{}) {
-	errorColor.Printf("✗ "+format+"\n", args...)
+	errorColor.Fprintf(os.Stderr, "✗ "+format+"\n", args...)
 }
 
 // Warning prints a yellow warning message.
 func Warning(format string, args ...interface{}) {
-	warningColor.Printf("⚠ "+format+"\n", args...)
+	warningColor.Fprintf(statusOut(), "⚠ "+format+"\n", args...)
 }
 
-// Info prints a cyan informational message.
+// Info prints a cyan informational message. Suppressed when quiet.
 func Info(format string, args ...interface{}) {
-	infoColor.Printf("ℹ "+format+"\n", args...)
+	if quiet {
+		return
+	}
+	infoColor.Fprintf(statusOut(), "ℹ "+format+"\n", args...)
 }
 
-// Header prints a magenta header with underline.
+// Header prints a magenta header with an underline. Suppressed when quiet.
 func Header(format string, args ...interface{}) {
-	headerColor.Printf("\n"+format+"\n", args...)
-	fmt.Println(color.MagentaString("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"))
+	if quiet {
+		return
+	}
+	w := statusOut()
+	headerColor.Fprintf(w, "\n"+format+"\n", args...)
+	fmt.Fprintln(w, color.MagentaString("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"))
 }
 
-// Section prints a bold section title with decorative borders.
+// Section prints a bold section title with decorative borders. Suppressed when quiet.
 func Section(title string) {
-	fmt.Println()
-	boldColor.Println("═══", title, "═══")
-	fmt.Println()
+	if quiet {
+		return
+	}
+	w := statusOut()
+	fmt.Fprintln(w)
+	boldColor.Fprintln(w, "═══", title, "═══")
+	fmt.Fprintln(w)
 }
 
-// Data prints plain formatted output.
+// Data prints plain content to stdout (used for human-readable result text).
 func Data(format string, args ...interface{}) {
 	fmt.Printf(format+"\n", args...)
 }
 
 // KeyValue prints a key-value pair with the key emphasized.
 func KeyValue(key, value string) {
-	boldColor.Printf("%s: ", key)
-	fmt.Println(value)
+	w := statusOut()
+	boldColor.Fprintf(w, "%s: ", key)
+	fmt.Fprintln(w, value)
 }
 
 // List prints a bulleted list of items.
 func List(items []string) {
 	for _, item := range items {
-		fmt.Printf("  • %s\n", item)
+		fmt.Fprintf(statusOut(), "  • %s\n", item)
 	}
 }
 
-// Divider prints a visual separator line.
+// Divider prints a visual separator line. Suppressed when quiet.
 func Divider() {
-	fmt.Println(color.HiBlackString("────────────────────────────────────────────────────────────────"))
+	if quiet {
+		return
+	}
+	fmt.Fprintln(statusOut(), color.HiBlackString("────────────────────────────────────────────────────────────────"))
 }
 
-// NewTable creates a tabwriter for formatted tabular output.
+// NewTable creates a tabwriter for formatted tabular output on stdout.
 func NewTable() *tabwriter.Writer {
 	return tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
 }

@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -54,7 +53,7 @@ func runInfo(cmd *cobra.Command, args []string) {
 	dexFiles, _ := apk.GetDexFiles(apkPath)
 	nativeLibs, _ := apk.GetNativeLibraries(apkPath)
 
-	if outputFormat == "json" {
+	if output.IsJSON() {
 		outputJSON(info, dexFiles, nativeLibs)
 		return
 	}
@@ -110,10 +109,7 @@ func outputJSON(info *apk.APKInfo, dexFiles []string, nativeLibs map[string][]st
 		"native_libs":   nativeLibs,
 	}
 
-	data, err := json.MarshalIndent(payload, "", "  ")
-	if err != nil {
+	if err := output.JSON(payload); err != nil {
 		output.Error("Failed to generate JSON: %v", err)
-		return
 	}
-	fmt.Println(string(data))
 }

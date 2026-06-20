@@ -196,12 +196,16 @@ disruptive one (touches every import) and should be its own PR. 3–4 follow.
 
 These are small, broadly useful, and become easy once Phase 0/1 land:
 
-1. **Global `--json` / `-o json` output.** Recon output is currently human-only.
-   Structured output makes the toolkit scriptable and pipeline-friendly. Implement once
-   in `pkg/output` (a renderer interface: text vs json) and thread a persistent flag
-   from the root command.
-2. **Global `--quiet` / `--no-color` / `NO_COLOR` support.** `fatih/color` already
-   honors `NO_COLOR`; expose `--no-color` and a `--quiet` that suppresses banners/info.
+1. **Global `--json` output.** ✅ done (foundation). `pkg/output` now has a text/JSON
+   mode: in JSON mode status messages go to stderr and a command emits its payload via
+   `output.JSON(v)` on stdout. Global `--json` flag on the root command, applied in a
+   `PersistentPreRun` (with `cobra.EnableTraverseRunHooks`). **apk** is fully migrated
+   (its old overloaded `-o` flag is gone; `files --extract` now uses `--dest`).
+   *Follow-up:* migrate `adb`/`nmap`/`ios` commands to emit JSON too (and `apk manifest`,
+   which is still text-only).
+2. **Global `--quiet` / `--no-color` / `NO_COLOR` support.** ✅ done. `--no-color` sets
+   `color.NoColor`; `--quiet` suppresses Info/Header/Section/Divider and the banner.
+   (`fatih/color` already honors the `NO_COLOR` env var.)
 3. **`mobile-recon doctor`.** One command that checks the environment: `adb`, `nmap`,
    `frida`, Xcode/`simctl` presence + versions, connected devices/simulators. Replaces
    the scattered `IsADBInstalled` / `isFridaToolsInstalled` checks with one report.

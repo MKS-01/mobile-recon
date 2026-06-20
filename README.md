@@ -28,6 +28,8 @@ A unified CLI toolkit for mobile security testing — Android, iOS, and the netw
 
 Run `mobile-recon list` for the full tree, or `mobile-recon <tool> --help` for a tool's commands.
 
+Global flags: `--json` for machine-readable output (apk today; more toolkits to follow), plus `--no-color` and `--quiet`.
+
 ---
 
 ## Getting Started

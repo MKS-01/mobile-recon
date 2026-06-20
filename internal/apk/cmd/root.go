@@ -11,9 +11,6 @@ import (
 )
 
 var (
-	// outputFormat stores the output format flag (text, json)
-	outputFormat string
-
 	// verbose enables verbose output
 	verbose bool
 
@@ -46,7 +43,6 @@ func Execute() {
 
 // init sets up persistent flags that are available to all subcommands.
 func init() {
-	RootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "text", "Output format (text, json)")
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 }
 

@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
@@ -95,7 +94,7 @@ func runStrings(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if outputFormat == "json" {
+	if output.IsJSON() {
 		outputStringsJSON(results)
 		return
 	}
@@ -178,10 +177,7 @@ func outputStringsJSON(results map[string][]string) {
 		deduped[file] = unique
 	}
 
-	data, err := json.MarshalIndent(deduped, "", "  ")
-	if err != nil {
+	if err := output.JSON(deduped); err != nil {
 		output.Error("Failed to generate JSON: %v", err)
-		return
 	}
-	fmt.Println(string(data))
 }
