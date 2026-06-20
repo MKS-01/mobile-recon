@@ -33,11 +33,11 @@ Useful for:
   • Malware analysis
 
 Examples:
-  apk-analyzer strings app.apk
-  apk-analyzer strings app.apk --min 10
-  apk-analyzer strings app.apk --search "api|key|secret"
-  apk-analyzer strings app.apk --urls
-  apk-analyzer strings app.apk --file classes.dex`,
+  mobile-recon apk strings app.apk
+  mobile-recon apk strings app.apk --min 10
+  mobile-recon apk strings app.apk --search "api|key|secret"
+  mobile-recon apk strings app.apk --urls
+  mobile-recon apk strings app.apk --file classes.dex`,
 	Args: cobra.ExactArgs(1),
 	Run:  runStrings,
 }

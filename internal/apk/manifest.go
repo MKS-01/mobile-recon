@@ -214,15 +214,19 @@ func isPermissionString(s string) bool {
 	return false
 }
 
+func isASCIILetter(c rune) bool { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') }
+func isASCIIDigit(c rune) bool  { return c >= '0' && c <= '9' }
+
 // isUpperSnakeCase checks if string is UPPER_SNAKE_CASE (common for permissions).
 func isUpperSnakeCase(s string) bool {
 	if len(s) == 0 {
 		return false
 	}
 	for _, c := range s {
-		if !((c >= 'A' && c <= 'Z') || c == '_' || (c >= '0' && c <= '9')) {
-			return false
+		if (c >= 'A' && c <= 'Z') || c == '_' || isASCIIDigit(c) {
+			continue
 		}
+		return false
 	}
 	return true
 }
@@ -240,16 +244,15 @@ func isValidPackageName(s string) bool {
 		if part == "" {
 			return false
 		}
-		// Check if part starts with letter and contains only valid chars
 		for i, c := range part {
-			if i == 0 {
-				if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') {
-					return false
-				}
-			} else {
-				if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
-					return false
-				}
+			// The first char must be a letter or underscore; later chars may
+			// also be digits.
+			ok := isASCIILetter(c) || c == '_'
+			if i > 0 {
+				ok = ok || isASCIIDigit(c)
+			}
+			if !ok {
+				return false
 			}
 		}
 	}

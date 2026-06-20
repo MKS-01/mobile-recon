@@ -26,9 +26,9 @@ Checks for:
   • Anti-tampering mechanisms
 
 Examples:
-  apk-analyzer security app.apk
-  apk-analyzer security app.apk -v
-  apk-analyzer security app.apk -o json`,
+  mobile-recon apk security app.apk
+  mobile-recon apk security app.apk -v
+  mobile-recon apk security app.apk -o json`,
 	Args: cobra.ExactArgs(1),
 	Run:  runSecurity,
 }
@@ -157,7 +157,7 @@ func runSecurity(cmd *cobra.Command, args []string) {
 		output.Success("No critical security issues found")
 	}
 
-	output.Info("Note: Use 'apk-analyzer strings' for deeper secrets analysis")
+	output.Info("Note: Use 'mobile-recon apk strings' for deeper secrets analysis")
 }
 
 func outputSecurityJSON(issues []apk.SecurityIssue, dangerousPerms []string) {

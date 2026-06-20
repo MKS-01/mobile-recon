@@ -19,45 +19,39 @@ A comprehensive command-line toolkit for Android Debug Bridge (ADB) operations. 
 - ADB installed and in PATH
 - Connected Android device or emulator
 
-### Build from source
+### Install
+
+This toolkit ships as part of the unified `mobile-recon` CLI. From the repo root:
 
 ```bash
-# Navigate to the adb-toolkit directory
-cd go-tools/adb-toolkit
-
-# Install dependencies
-go mod download
-
-# Build the binary
-go build -o adb-toolkit
-
-# Optional: Install globally
-go install
+./scripts/install.sh        # builds and installs mobile-recon to ~/go/bin
 ```
+
+The ADB commands are then available under `mobile-recon adb`.
 
 ## Quick Start
 
 ```bash
 # List connected devices
-./adb-toolkit device list
+mobile-recon adb device list
 
 # Get device info
-./adb-toolkit device info
+mobile-recon adb device info
 
 # List installed apps (third-party only)
-./adb-toolkit app list -3
+mobile-recon adb app list -3
 
 # Install an APK
-./adb-toolkit app install myapp.apk
+mobile-recon adb app install myapp.apk
 
 # Pull an APK from device
-./adb-toolkit app pull com.example.app
+mobile-recon adb app pull com.example.app
 
 # Take a screenshot
-./adb-toolkit device screenshot screenshot.png
+mobile-recon adb device screenshot screenshot.png
 
 # Monitor logcat
-./adb-toolkit recon logcat
+mobile-recon adb recon logcat
 ```
 
 ## Command Reference
@@ -66,107 +60,107 @@ go install
 
 ```bash
 # List all connected devices
-adb-toolkit device list
+mobile-recon adb device list
 
 # Get detailed device information
-adb-toolkit device info
+mobile-recon adb device info
 
 # Reboot device
-adb-toolkit device reboot
+mobile-recon adb device reboot
 
 # Reboot to recovery/bootloader
-adb-toolkit device reboot recovery
-adb-toolkit device reboot bootloader
+mobile-recon adb device reboot recovery
+mobile-recon adb device reboot bootloader
 
 # Execute shell command
-adb-toolkit device shell "ls -la /sdcard"
+mobile-recon adb device shell "ls -la /sdcard"
 
 # Take screenshot
-adb-toolkit device screenshot [filename.png]
+mobile-recon adb device screenshot [filename.png]
 
 # Record screen
-adb-toolkit device screenrecord [filename.mp4]
+mobile-recon adb device screenrecord [filename.mp4]
 ```
 
 ### App Management
 
 ```bash
 # List packages
-adb-toolkit app list              # All packages
-adb-toolkit app list -3           # Third-party only
-adb-toolkit app list -s           # System only
-adb-toolkit app list chrome       # Filter by name
+mobile-recon adb app list              # All packages
+mobile-recon adb app list -3           # Third-party only
+mobile-recon adb app list -s           # System only
+mobile-recon adb app list chrome       # Filter by name
 
 # Install/Uninstall
-adb-toolkit app install app.apk
-adb-toolkit app install -r app.apk    # Reinstall keeping data
-adb-toolkit app uninstall com.example.app
-adb-toolkit app uninstall -k com.example.app  # Keep data
+mobile-recon adb app install app.apk
+mobile-recon adb app install -r app.apk    # Reinstall keeping data
+mobile-recon adb app uninstall com.example.app
+mobile-recon adb app uninstall -k com.example.app  # Keep data
 
 # App Operations
-adb-toolkit app clear com.example.app     # Clear data
-adb-toolkit app info com.example.app      # Package info
-adb-toolkit app start com.example.app     # Launch app
-adb-toolkit app stop com.example.app      # Force stop
-adb-toolkit app pull com.example.app      # Pull APK
+mobile-recon adb app clear com.example.app     # Clear data
+mobile-recon adb app info com.example.app      # Package info
+mobile-recon adb app start com.example.app     # Launch app
+mobile-recon adb app stop com.example.app      # Force stop
+mobile-recon adb app pull com.example.app      # Pull APK
 ```
 
 ### Reconnaissance & Reverse Engineering
 
 ```bash
 # Logcat
-adb-toolkit recon logcat                    # Monitor logs
-adb-toolkit recon logcat "ActivityManager"  # Filter
-adb-toolkit recon logcat -s logcat.txt      # Save to file
-adb-toolkit recon logcat -c                 # Clear buffer
+mobile-recon adb recon logcat                    # Monitor logs
+mobile-recon adb recon logcat "ActivityManager"  # Filter
+mobile-recon adb recon logcat -s logcat.txt      # Save to file
+mobile-recon adb recon logcat -c                 # Clear buffer
 
 # Package Analysis
-adb-toolkit recon dump com.example.app              # Dump info
-adb-toolkit recon dump com.example.app -s dump.txt  # Save
-adb-toolkit recon activities com.example.app        # List activities
-adb-toolkit recon services com.example.app          # List services
-adb-toolkit recon receivers com.example.app         # List receivers
+mobile-recon adb recon dump com.example.app              # Dump info
+mobile-recon adb recon dump com.example.app -s dump.txt  # Save
+mobile-recon adb recon activities com.example.app        # List activities
+mobile-recon adb recon services com.example.app          # List services
+mobile-recon adb recon receivers com.example.app         # List receivers
 
 # Data Extraction (requires root)
-adb-toolkit recon files com.example.app             # List files
-adb-toolkit recon db com.example.app                # List databases
-adb-toolkit recon db com.example.app user.db        # Pull database
+mobile-recon adb recon files com.example.app             # List files
+mobile-recon adb recon db com.example.app                # List databases
+mobile-recon adb recon db com.example.app user.db        # Pull database
 
 # System Monitoring
-adb-toolkit recon network                   # Network connections
-adb-toolkit recon processes                 # Running processes
-adb-toolkit recon processes com.example     # Filter processes
+mobile-recon adb recon network                   # Network connections
+mobile-recon adb recon processes                 # Running processes
+mobile-recon adb recon processes com.example     # Filter processes
 ```
 
 ### Input Simulation
 
 ```bash
 # Text & Touch
-adb-toolkit input text "Hello World"
-adb-toolkit input tap 500 1000
-adb-toolkit input swipe 500 1500 500 500 300
+mobile-recon adb input text "Hello World"
+mobile-recon adb input tap 500 1000
+mobile-recon adb input swipe 500 1500 500 500 300
 
 # Keycodes
-adb-toolkit input key 66        # Enter
-adb-toolkit input home          # Home button
-adb-toolkit input back          # Back button
+mobile-recon adb input key 66        # Enter
+mobile-recon adb input home          # Home button
+mobile-recon adb input back          # Back button
 ```
 
 ### Frida Integration
 
 ```bash
-adb-toolkit frida ps                    # List processes
-adb-toolkit frida server check          # Check server status
-adb-toolkit frida server start          # Start server
-adb-toolkit frida trace com.example.app # Get trace command
+mobile-recon adb frida ps                    # List processes
+mobile-recon adb frida server check          # Check server status
+mobile-recon adb frida server start          # Start server
+mobile-recon adb frida trace com.example.app # Get trace command
 ```
 
 ## Working with Multiple Devices
 
 ```bash
 # Target specific device
-adb-toolkit -d emulator-5554 device info
-adb-toolkit -d emulator-5554 app list
+mobile-recon adb -d emulator-5554 device info
+mobile-recon adb -d emulator-5554 app list
 ```
 
 ## Common Keycodes
@@ -184,61 +178,58 @@ adb-toolkit -d emulator-5554 app list
 
 ### 1. Reconnaissance
 ```bash
-adb-toolkit app info com.target.app
-adb-toolkit recon dump com.target.app -s app_dump.txt
-adb-toolkit recon activities com.target.app
+mobile-recon adb app info com.target.app
+mobile-recon adb recon dump com.target.app -s app_dump.txt
+mobile-recon adb recon activities com.target.app
 ```
 
 ### 2. Extract APK
 ```bash
-adb-toolkit app pull com.target.app target.apk
+mobile-recon adb app pull com.target.app target.apk
 ```
 
 ### 3. Monitor Runtime
 ```bash
-adb-toolkit recon logcat com.target.app -s app_logs.txt
-adb-toolkit recon network
+mobile-recon adb recon logcat com.target.app -s app_logs.txt
+mobile-recon adb recon network
 ```
 
 ### 4. Extract Data (root required)
 ```bash
-adb-toolkit recon files com.target.app
-adb-toolkit recon db com.target.app user.db
+mobile-recon adb recon files com.target.app
+mobile-recon adb recon db com.target.app user.db
 ```
 
 ### 5. Dynamic Analysis
 ```bash
-adb-toolkit frida server start
-adb-toolkit frida ps
+mobile-recon adb frida server start
+mobile-recon adb frida ps
 ```
 
 ## Project Structure
 
 ```
-adb-toolkit/
-├── main.go              # Entry point
-├── cmd/                 # Command implementations
-│   ├── root.go         # Root command
-│   ├── device.go       # Device management
-│   ├── app.go          # App management
-│   ├── recon.go        # Reconnaissance
-│   ├── input.go        # Input simulation
-│   └── frida.go        # Frida integration
-└── pkg/                # Shared packages
-    ├── adb/            # ADB wrapper
-    └── utils/          # Utilities
+internal/adb/
+├── adb.go              # ADB wrapper (package adb)
+└── cmd/                # Command implementations (package cmd)
+    ├── root.go         # Root command
+    ├── device.go       # Device management
+    ├── app.go          # App management
+    ├── recon.go        # Reconnaissance
+    ├── input.go        # Input simulation
+    └── frida.go        # Frida integration
 ```
 
 ## Extending the CLI
 
-Add custom commands by creating a new file in `cmd/`:
+Add custom commands by creating a new file in `internal/adb/cmd/`:
 
 ```go
 package cmd
 
 import (
-    "github.com/mks/adb-toolkit/pkg/adb"
-    "github.com/mks/adb-toolkit/pkg/utils"
+    "github.com/MKS-01/mobile-recon/internal/adb"
+    "github.com/MKS-01/mobile-recon/pkg/output"
     "github.com/spf13/cobra"
 )
 
@@ -247,13 +238,13 @@ var myCmd = &cobra.Command{
     Short: "My custom command",
     Run: func(cmd *cobra.Command, args []string) {
         serial, _ := getTargetDevice()
-        output, _ := adb.ExecuteCommandWithDevice(serial, "shell", "echo", "hello")
-        utils.PrintSuccess(output)
+        out, _ := adb.ExecuteCommandWithDevice(serial, "shell", "echo", "hello")
+        output.Success(out)
     },
 }
 
 func init() {
-    rootCmd.AddCommand(myCmd)
+    RootCmd.AddCommand(myCmd)
 }
 ```
 
@@ -268,4 +259,4 @@ MIT
 
 ---
 
-**Part of the [automate-scripts](../../) monorepo**
+**Part of the [mobile-recon](../../) toolkit**

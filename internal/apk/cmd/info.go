@@ -26,8 +26,8 @@ Shows:
   • Number of DEX files
 
 Examples:
-  apk-analyzer info app.apk
-  apk-analyzer info app.apk --output json`,
+  mobile-recon apk info app.apk
+  mobile-recon apk info app.apk --output json`,
 	Args: cobra.ExactArgs(1),
 	Run:  runInfo,
 }

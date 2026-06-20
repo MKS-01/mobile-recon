@@ -50,11 +50,10 @@ command packages are imported into `internal/cli` and registered in-process — 
 
 ## Adding New Toolkits
 
-Use `/new-tool <name>` to scaffold. Note: `scripts/new-tool.sh` predates the
-single-module layout — scaffold manually by mirroring `internal/ios` (the smallest
-reference): create `internal/<name>/<name>.go` + `internal/<name>/cmd/`, then register
-the new `cmd.RootCmd` in `internal/cli/root.go` (via `register(...)` with a group ID).
-No `go.mod`/`replace` wiring is needed anymore.
+Use `/new-tool <name>` to scaffold. Mirror `internal/ios` (the smallest reference):
+create `internal/<name>/<name>.go` + `internal/<name>/cmd/`, then register the new
+`cmd.RootCmd` in `internal/cli/root.go` (via `register(...)` with a group ID). No
+`go.mod`/`replace` wiring is needed anymore.
 
 ## Testing
 

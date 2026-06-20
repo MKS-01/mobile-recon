@@ -40,10 +40,10 @@ Each permission includes:
   • Description: Detailed explanation of abuse potential
 
 Examples:
-  apk-analyzer abuse-permissions app.apk
-  apk-analyzer abuse-permissions app.apk --malware
-  apk-analyzer abuse-permissions app.apk -o json
-  apk-analyzer abuse-permissions app.apk -v`,
+  mobile-recon apk abuse-permissions app.apk
+  mobile-recon apk abuse-permissions app.apk --malware
+  mobile-recon apk abuse-permissions app.apk -o json
+  mobile-recon apk abuse-permissions app.apk -v`,
 	Args: cobra.ExactArgs(1),
 	Run:  runAbusePermissions,
 }

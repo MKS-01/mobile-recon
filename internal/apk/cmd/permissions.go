@@ -27,9 +27,9 @@ Identifies:
   • Permission risk categories
 
 Examples:
-  apk-analyzer permissions app.apk
-  apk-analyzer permissions app.apk --dangerous
-  apk-analyzer permissions app.apk -o json`,
+  mobile-recon apk permissions app.apk
+  mobile-recon apk permissions app.apk --dangerous
+  mobile-recon apk permissions app.apk -o json`,
 	Args: cobra.ExactArgs(1),
 	Run:  runPermissions,
 }

@@ -28,8 +28,8 @@ For full manifest analysis, use apktool or aapt2:
   aapt2 dump xmltree app.apk --file AndroidManifest.xml
 
 Examples:
-  apk-analyzer manifest app.apk
-  apk-analyzer manifest app.apk --extract -o manifest.xml`,
+  mobile-recon apk manifest app.apk
+  mobile-recon apk manifest app.apk --extract -o manifest.xml`,
 	Args: cobra.ExactArgs(1),
 	Run:  runManifest,
 }
