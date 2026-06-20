@@ -97,6 +97,29 @@ export PATH="$HOME/go/bin:$PATH"  # add to ~/.zshrc or ~/.bashrc
 
 ---
 
+## Project Structure
+
+A single Go module (`github.com/MKS-01/mobile-recon`); each toolkit is a package under `internal/`, compiled into one `mobile-recon` binary.
+
+```
+mobile-recon/
+├── main.go              # entry point
+├── internal/
+│   ├── cli/             # unified root command + `list`
+│   ├── adb/             # ADB toolkit       (adb.go  + cmd/)
+│   ├── apk/             # APK analyzer      (apk.go  + cmd/)
+│   ├── ios/             # iOS Simulator     (ios.go  + cmd/)
+│   └── nmap/            # Nmap toolkit      (nmap.go + cmd/)
+├── pkg/
+│   ├── output/          # shared console output
+│   └── frida/           # Frida host-tooling lookup
+└── scripts/             # install + test helpers
+```
+
+Build and vet everything from the repo root with `go build ./...` / `go vet ./...`.
+
+---
+
 ## Contributing
 
 1. Fork and create a branch: `git checkout -b feature/your-feature`
