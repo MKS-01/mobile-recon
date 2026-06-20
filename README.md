@@ -104,7 +104,7 @@ export PATH="$HOME/go/bin:$PATH"  # add to ~/.zshrc or ~/.bashrc
 3. Rebuild and install: `./scripts/install.sh`
 4. Open a Pull Request with a clear description
 
-Follow the existing tool structure in `go-tools/` when adding new toolkits.
+Follow the existing tool structure in `internal/<tool>/` when adding new toolkits.
 
 ---
 

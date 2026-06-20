@@ -29,9 +29,9 @@ Prerequisites:
   - A booted iOS Simulator
 
 Quick Start:
-  ios-toolkit frida setup     # Verify Frida installation
-  ios-toolkit frida ps        # List processes
-  ios-toolkit frida attach    # Attach to an app`,
+  mobile-recon ios frida setup     # Verify Frida installation
+  mobile-recon ios frida ps        # List processes
+  mobile-recon ios frida attach    # Attach to an app`,
 }
 
 var fridaSetupCmd = &cobra.Command{
@@ -58,9 +58,9 @@ var fridaAttachCmd = &cobra.Command{
 	Long: `Attach Frida to a running app on the iOS Simulator.
 
 Examples:
-  ios-toolkit frida attach com.example.app
-  ios-toolkit frida attach Safari
-  ios-toolkit frida attach -s script.js com.example.app`,
+  mobile-recon ios frida attach com.example.app
+  mobile-recon ios frida attach Safari
+  mobile-recon ios frida attach -s script.js com.example.app`,
 	Args: cobra.ExactArgs(1),
 	Run:  runFridaAttach,
 }
@@ -73,8 +73,8 @@ var fridaSpawnCmd = &cobra.Command{
 This is useful for hooking early initialization code.
 
 Examples:
-  ios-toolkit frida spawn com.example.app
-  ios-toolkit frida spawn -s early-hook.js com.example.app`,
+  mobile-recon ios frida spawn com.example.app
+  mobile-recon ios frida spawn -s early-hook.js com.example.app`,
 	Args: cobra.ExactArgs(1),
 	Run:  runFridaSpawn,
 }
@@ -85,9 +85,9 @@ var fridaTraceCmd = &cobra.Command{
 	Long: `Trace Objective-C/Swift methods or C functions in an iOS app.
 
 Examples:
-  ios-toolkit frida trace com.example.app
-  ios-toolkit frida trace Safari "-m '*[NSURL*]*'"
-  ios-toolkit frida trace Safari "-i 'open*'"`,
+  mobile-recon ios frida trace com.example.app
+  mobile-recon ios frida trace Safari "-m '*[NSURL*]*'"
+  mobile-recon ios frida trace Safari "-i 'open*'"`,
 	Args: cobra.RangeArgs(1, 2),
 	Run:  runFridaTrace,
 }
@@ -190,10 +190,10 @@ func runFridaSetup(cmd *cobra.Command, args []string) {
 	fmt.Println("  - Frida attaches directly to macOS processes")
 	fmt.Println()
 	fmt.Println("Quick commands:")
-	fmt.Println("  ios-toolkit frida ps                     # List processes")
-	fmt.Println("  ios-toolkit frida apps                   # List installed apps")
-	fmt.Println("  ios-toolkit frida attach <bundle_id>     # Attach to app")
-	fmt.Println("  ios-toolkit frida spawn <bundle_id>      # Spawn and attach")
+	fmt.Println("  mobile-recon ios frida ps                     # List processes")
+	fmt.Println("  mobile-recon ios frida apps                   # List installed apps")
+	fmt.Println("  mobile-recon ios frida attach <bundle_id>     # Attach to app")
+	fmt.Println("  mobile-recon ios frida spawn <bundle_id>      # Spawn and attach")
 	fmt.Println()
 	fmt.Println("Direct Frida commands:")
 	fmt.Printf("  frida -D %s <process>     # Attach\n", sim.UDID[:8])

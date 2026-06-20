@@ -201,7 +201,7 @@ func runDeviceInfo(cmd *cobra.Command, args []string) {
 	if err != nil {
 		output.Error("No target simulator: %v", err)
 		fmt.Println("\n  Boot a simulator first:")
-		fmt.Println("  ios-toolkit device boot <name>")
+		fmt.Println("  mobile-recon ios device boot <name>")
 		return
 	}
 

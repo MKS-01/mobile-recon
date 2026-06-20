@@ -34,8 +34,8 @@ var fridaCmd = &cobra.Command{
 	Long: `Helper commands for working with Frida framework on Android.
 
 Quick Start:
-  adb-toolkit frida setup    # Automated setup (recommended)
-  adb-toolkit frida ps       # List processes after setup`,
+  mobile-recon adb frida setup    # Automated setup (recommended)
+  mobile-recon adb frida ps       # List processes after setup`,
 }
 
 var fridaSetupCmd = &cobra.Command{
@@ -451,7 +451,7 @@ var fridaServerCheckCmd = &cobra.Command{
 		pid, _ := adb.GetProcessPID(serial, "frida-server")
 		if pid == "" {
 			output.Error("Frida server is not running")
-			output.Info("Run: adb-toolkit frida setup")
+			output.Info("Run: mobile-recon adb frida setup")
 			return
 		}
 
@@ -521,7 +521,7 @@ var fridaServerStartCmd = &cobra.Command{
 		cmdOutput, _ := adb.ShellCommand(serial, fmt.Sprintf("ls %s 2>/dev/null", fridaServerPath))
 		if strings.TrimSpace(cmdOutput) == "" {
 			output.Error("Frida server not found at %s", fridaServerPath)
-			output.Info("Run: adb-toolkit frida setup")
+			output.Info("Run: mobile-recon adb frida setup")
 			return
 		}
 

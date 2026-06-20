@@ -1,6 +1,6 @@
 version: "2"
 
-# Multi-module repo: run per module, e.g. (cd go-tools/adb-toolkit && golangci-lint run)
+# Single Go module rooted at the repo: golangci-lint run ./...
 
 linters:
   default: standard

@@ -26,11 +26,11 @@ var filesCmd = &cobra.Command{
 	Long: `List all files contained in an APK or extract specific files.
 
 Examples:
-  apk-analyzer files app.apk
-  apk-analyzer files app.apk --filter "*.dex"
-  apk-analyzer files app.apk --filter "lib/*"
-  apk-analyzer files app.apk --tree
-  apk-analyzer files app.apk --extract classes.dex -o ./output/`,
+  mobile-recon apk files app.apk
+  mobile-recon apk files app.apk --filter "*.dex"
+  mobile-recon apk files app.apk --filter "lib/*"
+  mobile-recon apk files app.apk --tree
+  mobile-recon apk files app.apk --extract classes.dex -o ./output/`,
 	Args: cobra.ExactArgs(1),
 	Run:  runFiles,
 }
