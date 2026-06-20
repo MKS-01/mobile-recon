@@ -4,20 +4,16 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 
-	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/MKS-01/mobile-recon/internal/ios"
+	"github.com/MKS-01/mobile-recon/pkg/frida"
+	"github.com/MKS-01/mobile-recon/pkg/output"
 	"github.com/spf13/cobra"
 )
 
-var (
-	spawnApp    bool
-	fridaScript string
-)
+var fridaScript string
 
 var fridaCmd = &cobra.Command{
 	Use:   "frida",
@@ -145,7 +141,7 @@ func runFridaSetup(cmd *cobra.Command, args []string) {
 
 	// Step 2: Check Frida installation
 	output.Info("Checking Frida installation...")
-	fridaPath := getFridaPath()
+	fridaPath := frida.Locate("frida")
 	if fridaPath == "" {
 		output.Error("Frida not found!")
 		fmt.Println("\n  Install Frida with:")
@@ -158,7 +154,7 @@ func runFridaSetup(cmd *cobra.Command, args []string) {
 
 	// Step 3: Check Frida version
 	output.Info("Checking Frida version...")
-	version, err := getFridaVersion()
+	version, err := frida.Version()
 	if err != nil {
 		output.Warning("Could not determine Frida version: %v", err)
 	} else {
@@ -214,7 +210,7 @@ func runFridaPs(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fridaPsPath := getFridaPsPath()
+	fridaPsPath := frida.Locate("frida-ps")
 	if fridaPsPath != "" {
 		// Use frida-ps to list processes
 		output.Info("Using frida-ps for simulator: %s", sim.Name)
@@ -301,7 +297,7 @@ func runFridaAttach(cmd *cobra.Command, args []string) {
 	output.Info("Simulator: %s", sim.Name)
 	output.Info("Target: %s", target)
 
-	fridaPath := getFridaPath()
+	fridaPath := frida.Locate("frida")
 	if fridaPath == "" {
 		output.Error("Frida not installed")
 		fmt.Println("\n  Install with: pip3 install frida-tools")
@@ -342,7 +338,7 @@ func runFridaSpawn(cmd *cobra.Command, args []string) {
 	output.Info("Simulator: %s", sim.Name)
 	output.Info("Bundle ID: %s", bundleID)
 
-	fridaPath := getFridaPath()
+	fridaPath := frida.Locate("frida")
 	if fridaPath == "" {
 		output.Error("Frida not installed")
 		fmt.Println("\n  Install with: pip3 install frida-tools")
@@ -387,7 +383,7 @@ func runFridaTrace(cmd *cobra.Command, args []string) {
 	output.Info("Simulator: %s", sim.Name)
 	output.Info("Target: %s", target)
 
-	fridaTracePath := getFridaTracePath()
+	fridaTracePath := frida.Locate("frida-trace")
 	if fridaTracePath == "" {
 		output.Error("frida-trace not found")
 		fmt.Println("\n  Install with: pip3 install frida-tools")
@@ -459,122 +455,8 @@ func runFridaKill(cmd *cobra.Command, args []string) {
 	output.Success("App terminated: %s", target)
 }
 
-// Helper functions
-
-func getFridaPath() string {
-	paths := []string{
-		"/usr/local/bin/frida",
-		"/opt/homebrew/bin/frida",
-	}
-
-	homeDir, _ := os.UserHomeDir()
-	if homeDir != "" {
-		paths = append(paths,
-			filepath.Join(homeDir, ".local/bin/frida"),
-			filepath.Join(homeDir, "Library/Python/3.9/bin/frida"),
-			filepath.Join(homeDir, "Library/Python/3.10/bin/frida"),
-			filepath.Join(homeDir, "Library/Python/3.11/bin/frida"),
-			filepath.Join(homeDir, "Library/Python/3.12/bin/frida"),
-			filepath.Join(homeDir, "Library/Python/3.13/bin/frida"),
-		)
-	}
-
-	for _, p := range paths {
-		if _, err := os.Stat(p); err == nil {
-			return p
-		}
-	}
-
-	// Try PATH
-	if path, err := exec.LookPath("frida"); err == nil {
-		return path
-	}
-
-	return ""
-}
-
-func getFridaPsPath() string {
-	paths := []string{
-		"/usr/local/bin/frida-ps",
-		"/opt/homebrew/bin/frida-ps",
-	}
-
-	homeDir, _ := os.UserHomeDir()
-	if homeDir != "" {
-		paths = append(paths,
-			filepath.Join(homeDir, ".local/bin/frida-ps"),
-			filepath.Join(homeDir, "Library/Python/3.9/bin/frida-ps"),
-			filepath.Join(homeDir, "Library/Python/3.10/bin/frida-ps"),
-			filepath.Join(homeDir, "Library/Python/3.11/bin/frida-ps"),
-			filepath.Join(homeDir, "Library/Python/3.12/bin/frida-ps"),
-			filepath.Join(homeDir, "Library/Python/3.13/bin/frida-ps"),
-		)
-	}
-
-	for _, p := range paths {
-		if _, err := os.Stat(p); err == nil {
-			return p
-		}
-	}
-
-	if runtime.GOOS == "windows" {
-		return ""
-	}
-
-	if path, err := exec.LookPath("frida-ps"); err == nil {
-		return path
-	}
-
-	return ""
-}
-
-func getFridaTracePath() string {
-	paths := []string{
-		"/usr/local/bin/frida-trace",
-		"/opt/homebrew/bin/frida-trace",
-	}
-
-	homeDir, _ := os.UserHomeDir()
-	if homeDir != "" {
-		paths = append(paths,
-			filepath.Join(homeDir, ".local/bin/frida-trace"),
-			filepath.Join(homeDir, "Library/Python/3.9/bin/frida-trace"),
-			filepath.Join(homeDir, "Library/Python/3.10/bin/frida-trace"),
-			filepath.Join(homeDir, "Library/Python/3.11/bin/frida-trace"),
-			filepath.Join(homeDir, "Library/Python/3.12/bin/frida-trace"),
-			filepath.Join(homeDir, "Library/Python/3.13/bin/frida-trace"),
-		)
-	}
-
-	for _, p := range paths {
-		if _, err := os.Stat(p); err == nil {
-			return p
-		}
-	}
-
-	if path, err := exec.LookPath("frida-trace"); err == nil {
-		return path
-	}
-
-	return ""
-}
-
-func getFridaVersion() (string, error) {
-	fridaPath := getFridaPath()
-	if fridaPath == "" {
-		return "", fmt.Errorf("frida not found")
-	}
-
-	output, err := ios.ExecuteCommand(fridaPath, "--version")
-	if err != nil {
-		return "", err
-	}
-
-	return strings.TrimSpace(output), nil
-}
-
 func testFridaConnectivity() bool {
-	fridaPsPath := getFridaPsPath()
+	fridaPsPath := frida.Locate("frida-ps")
 	if fridaPsPath == "" {
 		return false
 	}

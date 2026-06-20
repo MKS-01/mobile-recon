@@ -171,11 +171,15 @@ build-loop friction and version skew without moving files. (See Phase 0.)
 - Per-tool `README.md`s preserved under `internal/<tool>/` (their build snippets still
   reference old paths — cleaned up alongside Phase 3 docs work).
 
-### Phase 3 — Break up the god-files & extract shared frida
-- Split `apk-analyzer/pkg/apk/apk.go` (1,621 LOC) along its seams: `manifest.go`,
-  `files.go`, `strings.go`, `security.go`, `apk.go` (open/zip core).
-- Extract shared frida host-tooling (`locate binary`, `version`, `installed?`) into
-  `pkg/frida`; leave Android frida-*server* provisioning in `internal/adb`.
+### Phase 3 — Break up the god-files & extract shared frida ✅ done
+- Split `internal/apk/apk.go` (1,621 LOC) along its seams: `apk.go` (open/zip core,
+  98 LOC), `files.go`, `strings.go`, `manifest.go`, `security.go` (analysis logic), and
+  `permissions_data.go` (the ~680-line dangerous/malware permission data tables).
+  Removed dead `parseAXML` and `stringContains`.
+- Extracted shared frida host-tooling into `pkg/frida` (`Locate(tool)`, `Installed()`,
+  `Version()`), collapsing the duplicated path-finders in both toolkits; left Android
+  frida-*server* provisioning (download/extract/push) in `internal/adb`. Also removed
+  the unused `spawnApp` var in the iOS frida command.
 
 ### Phase 4 — Tests & CI (no tests exist today)
 - Unit tests for the pure logic: arch mapping (`mapArchToFrida`), apk parsing, nmap
