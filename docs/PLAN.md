@@ -156,15 +156,20 @@ build-loop friction and version skew without moving files. (See Phase 0.)
   `root.go`. Single source of truth — `list` can no longer disagree with what runs, and
   the misleading "✓ Available / ✗ Not built" status is gone.
 
-### Phase 2 — Collapse the module sprawl (the big move)
-- Merge all six modules into one `go.mod` at repo root.
-- Move `go-tools/<tool>` → `internal/<tool>`; `cmd` → `internal/<tool>/command`;
-  `pkg/<x>` → `internal/<tool>/<x>` (or `pkg/` if shared).
-- Promote `common/output` → `pkg/output`.
-- Delete the `replace` directives. Update imports repo-wide (single
-  find-and-replace of the module path).
-- Rewrite `scripts/install.sh` to a `go build`/`go install` of the root module
-  (drops ~80% of the script — no more per-tool build orchestration).
+### Phase 2 — Collapse the module sprawl (the big move) ✅ done
+- Merged all six modules into one `go.mod` at the repo root
+  (`github.com/MKS-01/mobile-recon`); deleted every per-module `go.mod`/`go.sum`, the
+  `replace` directives, the per-tool `main.go`, and `go.work`. `go build ./...` /
+  `go vet ./...` / `golangci-lint run ./...` now work from the root.
+- Moved `go-tools/<tool>/cmd` → `internal/<tool>/cmd` and `go-tools/<tool>/pkg/<x>` →
+  `internal/<tool>/<tool>.go`. **As-built deviations from the sketch above:** kept the
+  command subpackage named `cmd` (not `command`) to avoid touching every `package`
+  clause; the iOS helper package was renamed `simctl` → `ios` so dir and package match.
+- Promoted `common/output` → `pkg/output`.
+- Pointed `scripts/install.sh` at the root module (one `go build`); refreshed the
+  `/build-all` and `/lint-all` skills and CLAUDE.md for the single-module layout.
+- Per-tool `README.md`s preserved under `internal/<tool>/` (their build snippets still
+  reference old paths — cleaned up alongside Phase 3 docs work).
 
 ### Phase 3 — Break up the god-files & extract shared frida
 - Split `apk-analyzer/pkg/apk/apk.go` (1,621 LOC) along its seams: `manifest.go`,

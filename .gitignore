@@ -1,11 +1,5 @@
-# Binaries for all Go tools (ignore only binary files in the root of each tool directory)
-go-tools/adb-toolkit/adb-toolkit
-go-tools/nmap-toolkit/nmap-toolkit
-go-tools/mobile-recon/mobile-recon
-go-tools/**/*.exe
-go-tools/**/*.dll
-go-tools/**/*.so
-go-tools/**/*.dylib
+# Built CLI binary (single Go module at repo root)
+/mobile-recon
 
 # General binaries
 *.exe
@@ -20,8 +14,6 @@ go-tools/**/*.dylib
 # Go workspace files
 go.work
 go.work.sum
-# ...but this monorepo commits its workspace file (single app, pinned modules)
-!go-tools/go.work
 
 # Build artifacts
 dist/
